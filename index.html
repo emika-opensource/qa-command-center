@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,425 +7,327 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
-                    },
-                    colors: {
-                        dark: {
-                            950: '#09090b',
-                            900: '#0c0c0e',
-                            800: '#121214',
-                            700: '#1a1a1d',
-                            600: '#232326',
-                            500: '#2c2c30',
-                            400: '#3f3f46',
-                        },
-                        accent: {
-                            DEFAULT: '#8b5cf6',
-                            light: '#a78bfa',
-                            dark: '#7c3aed',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', system-ui, sans-serif; }
-        .fade-enter-active, .fade-leave-active { transition: opacity 0.2s ease; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0a0a;
+            color: #E8E6E3;
+            min-height: 100vh;
+            font-size: 14px;
+            letter-spacing: 0.01em;
+        }
+        input, textarea, select, button { font-family: inherit; }
+        input:focus, textarea:focus { outline: none; }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); }
+        
+        /* Transitions */
+        .fade-enter-active, .fade-leave-active { transition: opacity 0.15s ease; }
         .fade-enter-from, .fade-leave-to { opacity: 0; }
-        .slide-enter-active, .slide-leave-active { transition: all 0.3s ease; }
-        .slide-enter-from { opacity: 0; transform: translateX(20px); }
-        .slide-leave-to { opacity: 0; transform: translateX(-20px); }
-        input:focus, textarea:focus, select:focus { outline: none; }
-        .scrollbar-thin::-webkit-scrollbar { width: 6px; }
-        .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
-        .scrollbar-thin::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 3px; }
-        .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: #52525b; }
-        @keyframes pulse-slow { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        .animate-pulse-slow { animation: pulse-slow 2s ease-in-out infinite; }
     </style>
 </head>
-<body class="bg-dark-950 text-gray-100 min-h-screen">
-    <div id="app" class="flex h-screen overflow-hidden">
+<body>
+    <div id="app" style="display: flex; height: 100vh; overflow: hidden;">
         
-        <!-- Setup Wizard Overlay -->
-        <div v-if="!isConfigured" class="fixed inset-0 z-50 bg-dark-950 flex items-center justify-center p-6">
-            <div class="w-full max-w-2xl">
-                <!-- Progress Steps -->
-                <div class="flex items-center justify-center gap-3 mb-12">
-                    <div v-for="(step, i) in setupSteps" :key="i" 
-                         :class="[
-                             'w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-all',
-                             currentSetupStep > i ? 'bg-accent text-white' : 
-                             currentSetupStep === i ? 'bg-accent/20 text-accent border-2 border-accent' : 
-                             'bg-dark-700 text-gray-500'
-                         ]">
-                        <svg v-if="currentSetupStep > i" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                        </svg>
-                        <span v-else>{{ i + 1 }}</span>
+        <!-- Setup Flow -->
+        <div v-if="!isConfigured" style="position: fixed; inset: 0; z-index: 50; background: #0a0a0a; display: flex; align-items: center; justify-content: center; padding: 24px;">
+            <div style="width: 100%; max-width: 480px;">
+                
+                <!-- Progress -->
+                <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 48px;">
+                    <template v-for="(step, i) in 3" :key="i">
+                        <div :style="{
+                            width: '8px', height: '8px', borderRadius: '50%',
+                            background: currentSetupStep >= i ? '#E8E6E3' : 'rgba(255,255,255,0.1)'
+                        }"></div>
+                    </template>
+                </div>
+
+                <!-- Step 0: Welcome -->
+                <div v-if="currentSetupStep === 0" style="text-align: center;">
+                    <h1 style="font-size: 24px; font-weight: 600; margin-bottom: 12px;">QA Command Center</h1>
+                    <p style="color: #666; margin-bottom: 32px;">AI-powered testing for your applications</p>
+                    
+                    <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 24px; text-align: left; margin-bottom: 32px;">
+                        <p style="font-size: 13px; color: #888; margin-bottom: 16px;">To run tests, you'll need:</p>
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <span style="width: 24px; height: 24px; background: rgba(255,255,255,0.05); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #666;">1</span>
+                                <span style="color: #ccc;">BrowserBase API credentials</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <span style="width: 24px; height: 24px; background: rgba(255,255,255,0.05); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #666;">2</span>
+                                <span style="color: #ccc;">Anthropic API key</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button @click="currentSetupStep++" style="width: 100%; padding: 12px 24px; background: #E8E6E3; color: #0a0a0a; border: none; border-radius: 8px; font-weight: 500; cursor: pointer;">
+                        Continue
+                    </button>
+                </div>
+
+                <!-- Step 1: BrowserBase -->
+                <div v-else-if="currentSetupStep === 1">
+                    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">BrowserBase</h2>
+                    <p style="color: #666; font-size: 13px; margin-bottom: 24px;">Cloud browser infrastructure for testing</p>
+                    
+                    <div style="background: rgba(255,255,255,0.02); border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+                        <p style="font-size: 12px; color: #666; margin-bottom: 12px;">Get your credentials:</p>
+                        <ol style="font-size: 13px; color: #888; padding-left: 20px; line-height: 1.8;">
+                            <li>Sign up at <a href="https://browserbase.com" target="_blank" style="color: #E8E6E3; text-decoration: underline;">browserbase.com</a></li>
+                            <li>Go to Dashboard → Settings</li>
+                            <li>Copy API Key and Project ID</li>
+                        </ol>
+                    </div>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px;">
+                        <div>
+                            <label style="display: block; font-size: 12px; color: #666; margin-bottom: 6px;">API Key</label>
+                            <input v-model="config.browserbaseApiKey" type="password" placeholder="bb_live_..."
+                                   style="width: 100%; padding: 10px 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; color: #E8E6E3; font-size: 14px;">
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 12px; color: #666; margin-bottom: 6px;">Project ID</label>
+                            <input v-model="config.browserbaseProjectId" type="text" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                                   style="width: 100%; padding: 10px 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; color: #E8E6E3; font-size: 14px;">
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 12px;">
+                        <button @click="currentSetupStep--" style="padding: 12px 24px; background: transparent; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #888; cursor: pointer;">
+                            Back
+                        </button>
+                        <button @click="currentSetupStep++" :disabled="!config.browserbaseApiKey || !config.browserbaseProjectId"
+                                :style="{
+                                    flex: 1, padding: '12px 24px', border: 'none', borderRadius: '8px', fontWeight: 500, cursor: 'pointer',
+                                    background: config.browserbaseApiKey && config.browserbaseProjectId ? '#E8E6E3' : 'rgba(255,255,255,0.05)',
+                                    color: config.browserbaseApiKey && config.browserbaseProjectId ? '#0a0a0a' : '#444'
+                                }">
+                            Continue
+                        </button>
                     </div>
                 </div>
 
-                <!-- Step Content -->
-                <transition name="slide" mode="out-in">
-                    <!-- Step 1: Welcome -->
-                    <div v-if="currentSetupStep === 0" key="step0" class="text-center">
-                        <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-accent to-purple-600 rounded-2xl flex items-center justify-center">
-                            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                        </div>
-                        <h1 class="text-3xl font-bold mb-4">Welcome to QA Command Center</h1>
-                        <p class="text-gray-400 text-lg mb-8 max-w-md mx-auto">
-                            Your AI-powered testing dashboard. Run instant tests, find bugs, and generate test cases automatically.
-                        </p>
-                        <div class="bg-dark-800 rounded-xl p-6 text-left mb-8 border border-dark-600">
-                            <h3 class="font-semibold mb-4 flex items-center gap-2">
-                                <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                                What you'll need
-                            </h3>
-                            <ul class="space-y-3 text-gray-400">
-                                <li class="flex items-start gap-3">
-                                    <span class="w-6 h-6 bg-dark-600 rounded flex items-center justify-center flex-shrink-0 mt-0.5">1</span>
-                                    <span><strong class="text-white">BrowserBase API Key</strong> — For running browser tests in the cloud</span>
-                                </li>
-                                <li class="flex items-start gap-3">
-                                    <span class="w-6 h-6 bg-dark-600 rounded flex items-center justify-center flex-shrink-0 mt-0.5">2</span>
-                                    <span><strong class="text-white">Anthropic API Key</strong> — For AI-powered test analysis</span>
-                                </li>
-                            </ul>
-                        </div>
-                        <button @click="currentSetupStep++" class="px-8 py-3 bg-accent hover:bg-accent-dark rounded-lg font-medium transition">
-                            Get Started
+                <!-- Step 2: Anthropic -->
+                <div v-else-if="currentSetupStep === 2">
+                    <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">Anthropic</h2>
+                    <p style="color: #666; font-size: 13px; margin-bottom: 24px;">AI analysis for bug detection</p>
+                    
+                    <div style="background: rgba(255,255,255,0.02); border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+                        <p style="font-size: 12px; color: #666; margin-bottom: 12px;">Get your API key:</p>
+                        <ol style="font-size: 13px; color: #888; padding-left: 20px; line-height: 1.8;">
+                            <li>Go to <a href="https://console.anthropic.com" target="_blank" style="color: #E8E6E3; text-decoration: underline;">console.anthropic.com</a></li>
+                            <li>Navigate to API Keys</li>
+                            <li>Create and copy a new key</li>
+                        </ol>
+                    </div>
+                    
+                    <div style="margin-bottom: 24px;">
+                        <label style="display: block; font-size: 12px; color: #666; margin-bottom: 6px;">API Key</label>
+                        <input v-model="config.anthropicApiKey" type="password" placeholder="sk-ant-..."
+                               style="width: 100%; padding: 10px 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; color: #E8E6E3; font-size: 14px;">
+                    </div>
+                    
+                    <div style="display: flex; gap: 12px;">
+                        <button @click="currentSetupStep--" style="padding: 12px 24px; background: transparent; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #888; cursor: pointer;">
+                            Back
+                        </button>
+                        <button @click="completeSetup" :disabled="!config.anthropicApiKey"
+                                :style="{
+                                    flex: 1, padding: '12px 24px', border: 'none', borderRadius: '8px', fontWeight: 500, cursor: 'pointer',
+                                    background: config.anthropicApiKey ? '#E8E6E3' : 'rgba(255,255,255,0.05)',
+                                    color: config.anthropicApiKey ? '#0a0a0a' : '#444'
+                                }">
+                            Complete Setup
                         </button>
                     </div>
-
-                    <!-- Step 2: BrowserBase -->
-                    <div v-else-if="currentSetupStep === 1" key="step1">
-                        <div class="text-center mb-8">
-                            <div class="w-16 h-16 mx-auto mb-4 bg-orange-500/20 rounded-xl flex items-center justify-center">
-                                <svg class="w-8 h-8 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
-                                </svg>
-                            </div>
-                            <h2 class="text-2xl font-bold mb-2">Connect BrowserBase</h2>
-                            <p class="text-gray-400">BrowserBase runs browser tests in the cloud so we can test any website</p>
-                        </div>
-
-                        <div class="bg-dark-800 rounded-xl p-6 border border-dark-600 mb-6">
-                            <h3 class="font-medium mb-4">How to get your API key:</h3>
-                            <ol class="space-y-3 text-gray-400 text-sm">
-                                <li class="flex items-start gap-3">
-                                    <span class="w-5 h-5 bg-accent/20 text-accent rounded flex items-center justify-center flex-shrink-0 text-xs">1</span>
-                                    <span>Go to <a href="https://www.browserbase.com/sign-up" target="_blank" class="text-accent hover:underline">browserbase.com/sign-up</a> and create a free account</span>
-                                </li>
-                                <li class="flex items-start gap-3">
-                                    <span class="w-5 h-5 bg-accent/20 text-accent rounded flex items-center justify-center flex-shrink-0 text-xs">2</span>
-                                    <span>Go to <a href="https://www.browserbase.com/overview" target="_blank" class="text-accent hover:underline">Overview Dashboard</a></span>
-                                </li>
-                                <li class="flex items-start gap-3">
-                                    <span class="w-5 h-5 bg-accent/20 text-accent rounded flex items-center justify-center flex-shrink-0 text-xs">3</span>
-                                    <span>Copy your <strong class="text-white">API Key</strong> and <strong class="text-white">Project ID</strong> from the right sidebar</span>
-                                </li>
-                            </ol>
-                            <p class="mt-4 text-xs text-gray-500">Free plan includes 60 minutes/month of browser time</p>
-                        </div>
-
-                        <div class="space-y-4 mb-8">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-400 mb-2">BrowserBase API Key</label>
-                                <input v-model="config.browserbaseApiKey" type="password" placeholder="bb_live_..."
-                                       class="w-full bg-dark-700 border border-dark-500 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:border-accent transition">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-400 mb-2">Project ID</label>
-                                <input v-model="config.browserbaseProjectId" type="text" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-                                       class="w-full bg-dark-700 border border-dark-500 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:border-accent transition">
-                            </div>
-                        </div>
-
-                        <div class="flex gap-4">
-                            <button @click="currentSetupStep--" class="px-6 py-3 bg-dark-700 hover:bg-dark-600 rounded-lg font-medium transition">
-                                Back
-                            </button>
-                            <button @click="currentSetupStep++" :disabled="!config.browserbaseApiKey || !config.browserbaseProjectId"
-                                    class="flex-1 px-6 py-3 bg-accent hover:bg-accent-dark disabled:bg-dark-600 disabled:text-gray-500 rounded-lg font-medium transition">
-                                Continue
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Step 3: Anthropic -->
-                    <div v-else-if="currentSetupStep === 2" key="step2">
-                        <div class="text-center mb-8">
-                            <div class="w-16 h-16 mx-auto mb-4 bg-amber-500/20 rounded-xl flex items-center justify-center">
-                                <svg class="w-8 h-8 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
-                                </svg>
-                            </div>
-                            <h2 class="text-2xl font-bold mb-2">Connect AI</h2>
-                            <p class="text-gray-400">Anthropic's Claude analyzes tests and generates intelligent reports</p>
-                        </div>
-
-                        <div class="bg-dark-800 rounded-xl p-6 border border-dark-600 mb-6">
-                            <h3 class="font-medium mb-4">How to get your API key:</h3>
-                            <ol class="space-y-3 text-gray-400 text-sm">
-                                <li class="flex items-start gap-3">
-                                    <span class="w-5 h-5 bg-accent/20 text-accent rounded flex items-center justify-center flex-shrink-0 text-xs">1</span>
-                                    <span>Go to <a href="https://console.anthropic.com/" target="_blank" class="text-accent hover:underline">console.anthropic.com</a></span>
-                                </li>
-                                <li class="flex items-start gap-3">
-                                    <span class="w-5 h-5 bg-accent/20 text-accent rounded flex items-center justify-center flex-shrink-0 text-xs">2</span>
-                                    <span>Create an account or sign in</span>
-                                </li>
-                                <li class="flex items-start gap-3">
-                                    <span class="w-5 h-5 bg-accent/20 text-accent rounded flex items-center justify-center flex-shrink-0 text-xs">3</span>
-                                    <span>Go to <strong class="text-white">API Keys</strong> and create a new key</span>
-                                </li>
-                            </ol>
-                        </div>
-
-                        <div class="space-y-4 mb-8">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-400 mb-2">Anthropic API Key</label>
-                                <input v-model="config.anthropicApiKey" type="password" placeholder="sk-ant-..."
-                                       class="w-full bg-dark-700 border border-dark-500 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:border-accent transition">
-                            </div>
-                        </div>
-
-                        <div class="flex gap-4">
-                            <button @click="currentSetupStep--" class="px-6 py-3 bg-dark-700 hover:bg-dark-600 rounded-lg font-medium transition">
-                                Back
-                            </button>
-                            <button @click="completeSetup" :disabled="!config.anthropicApiKey"
-                                    class="flex-1 px-6 py-3 bg-accent hover:bg-accent-dark disabled:bg-dark-600 disabled:text-gray-500 rounded-lg font-medium transition">
-                                Complete Setup
-                            </button>
-                        </div>
-                    </div>
-                </transition>
+                </div>
             </div>
         </div>
 
         <!-- Sidebar -->
-        <aside v-if="isConfigured" class="w-64 bg-dark-900 border-r border-dark-700 flex flex-col flex-shrink-0">
+        <aside v-if="isConfigured" style="width: 220px; background: #0a0a0a; border-right: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; flex-shrink: 0;">
             <!-- Logo -->
-            <div class="p-5 border-b border-dark-700">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-gradient-to-br from-accent to-purple-600 rounded-xl flex items-center justify-center">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <h1 class="font-semibold text-sm">QA Command</h1>
-                        <p class="text-xs text-gray-500">Center</p>
-                    </div>
-                </div>
+            <div style="padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+                <div style="font-size: 14px; font-weight: 600;">QA Command Center</div>
             </div>
 
-            <!-- Navigation -->
-            <nav class="flex-1 p-4 space-y-1">
-                <button v-for="item in navItems" :key="item.id"
-                        @click="currentPage = item.id"
-                        :class="[
-                            'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all',
-                            currentPage === item.id 
-                                ? 'bg-accent/10 text-accent' 
-                                : 'text-gray-400 hover:text-white hover:bg-dark-700'
-                        ]">
-                    <span v-html="item.icon" class="w-5 h-5"></span>
+            <!-- Nav -->
+            <nav style="flex: 1; padding: 12px;">
+                <button v-for="item in navItems" :key="item.id" @click="currentPage = item.id"
+                        :style="{
+                            width: '100%', display: 'flex', alignItems: 'center', gap: '10px',
+                            padding: '10px 12px', border: 'none', borderRadius: '8px',
+                            background: currentPage === item.id ? 'rgba(255,255,255,0.05)' : 'transparent',
+                            color: currentPage === item.id ? '#E8E6E3' : '#666',
+                            cursor: 'pointer', fontSize: '13px', textAlign: 'left', marginBottom: '4px'
+                        }">
+                    <span v-html="item.icon" style="width: 18px; height: 18px; opacity: 0.7;"></span>
                     {{ item.label }}
-                    <span v-if="item.badge" class="ml-auto bg-red-500/20 text-red-400 text-xs px-2 py-0.5 rounded-full">
-                        {{ item.badge }}
+                    <span v-if="item.id === 'bugs' && bugs.length" style="margin-left: auto; background: rgba(239,68,68,0.15); color: #f87171; font-size: 11px; padding: 2px 6px; border-radius: 10px;">
+                        {{ bugs.length }}
                     </span>
                 </button>
             </nav>
 
             <!-- Status -->
-            <div class="p-4 border-t border-dark-700">
-                <div class="flex items-center gap-2 text-sm text-gray-400">
-                    <span class="w-2 h-2 bg-green-500 rounded-full"></span>
-                    AI Ready
+            <div style="padding: 16px; border-top: 1px solid rgba(255,255,255,0.06);">
+                <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: #666;">
+                    <span style="width: 6px; height: 6px; background: #22c55e; border-radius: 50%;"></span>
+                    Connected
                 </div>
             </div>
         </aside>
 
-        <!-- Main Content -->
-        <main v-if="isConfigured" class="flex-1 overflow-auto bg-dark-950">
-            <!-- Run Test Page -->
-            <div v-if="currentPage === 'test'" class="p-8 max-w-4xl mx-auto">
-                <div class="mb-8">
-                    <h2 class="text-2xl font-bold mb-2">Run Test</h2>
-                    <p class="text-gray-400">Enter a URL and describe what you want to test</p>
+        <!-- Main -->
+        <main v-if="isConfigured" style="flex: 1; overflow: auto; background: #0c0c0c;">
+            
+            <!-- Test Page -->
+            <div v-if="currentPage === 'test'" style="padding: 32px; max-width: 800px; margin: 0 auto;">
+                <div style="margin-bottom: 32px;">
+                    <h1 style="font-size: 20px; font-weight: 600; margin-bottom: 4px;">Run Test</h1>
+                    <p style="color: #666; font-size: 13px;">Enter a URL to analyze</p>
                 </div>
 
-                <div class="bg-dark-800 rounded-2xl border border-dark-600 p-6 mb-8">
-                    <div class="space-y-5">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-300 mb-2">URL to Test</label>
-                            <input v-model="testUrl" type="url" placeholder="https://your-app.com"
-                                   class="w-full bg-dark-700 border border-dark-500 rounded-xl px-4 py-3.5 text-white placeholder-gray-500 focus:border-accent transition text-lg">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-300 mb-2">What to Test</label>
-                            <textarea v-model="testPrompt" rows="3" placeholder="Test the login flow, try invalid credentials, check error messages..."
-                                      class="w-full bg-dark-700 border border-dark-500 rounded-xl px-4 py-3.5 text-white placeholder-gray-500 focus:border-accent transition resize-none"></textarea>
-                        </div>
-                        <div class="flex items-center justify-between pt-2">
-                            <div class="flex gap-6 text-sm">
-                                <label class="flex items-center gap-2 cursor-pointer text-gray-400 hover:text-white transition">
-                                    <input type="checkbox" v-model="testOptions.screenshots" class="rounded bg-dark-600 border-dark-400 text-accent focus:ring-accent focus:ring-offset-0">
-                                    Screenshots
-                                </label>
-                                <label class="flex items-center gap-2 cursor-pointer text-gray-400 hover:text-white transition">
-                                    <input type="checkbox" v-model="testOptions.generateCases" class="rounded bg-dark-600 border-dark-400 text-accent focus:ring-accent focus:ring-offset-0">
-                                    Generate Test Cases
-                                </label>
-                            </div>
-                            <button @click="runTest" :disabled="!testUrl || testing"
-                                    class="px-6 py-3 bg-accent hover:bg-accent-dark disabled:bg-dark-600 disabled:text-gray-500 rounded-xl font-medium transition flex items-center gap-2">
-                                <svg v-if="testing" class="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none">
-                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-linecap="round" class="opacity-25"/>
-                                    <path d="M12 2a10 10 0 0110 10" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-                                </svg>
-                                <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                                {{ testing ? 'Testing...' : 'Run Test' }}
-                            </button>
-                        </div>
+                <!-- Test Form -->
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; font-size: 12px; color: #666; margin-bottom: 8px;">URL</label>
+                        <input v-model="testUrl" type="url" placeholder="https://example.com"
+                               style="width: 100%; padding: 12px 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; color: #E8E6E3; font-size: 15px;">
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; font-size: 12px; color: #666; margin-bottom: 8px;">Instructions <span style="color: #444;">(optional)</span></label>
+                        <textarea v-model="testPrompt" rows="2" placeholder="Focus on login flow, check form validation..."
+                                  style="width: 100%; padding: 12px 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; color: #E8E6E3; font-size: 14px; resize: none;"></textarea>
+                    </div>
+                    <div style="display: flex; justify-content: flex-end;">
+                        <button @click="runTest" :disabled="!testUrl || testing"
+                                :style="{
+                                    padding: '10px 20px', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: 500,
+                                    cursor: testUrl && !testing ? 'pointer' : 'not-allowed',
+                                    background: testUrl && !testing ? '#E8E6E3' : 'rgba(255,255,255,0.05)',
+                                    color: testUrl && !testing ? '#0a0a0a' : '#444',
+                                    display: 'flex', alignItems: 'center', gap: '8px'
+                                }">
+                            <svg v-if="testing" style="width: 16px; height: 16px; animation: spin 1s linear infinite;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 2v4m0 12v4m-7-10H2m20 0h-3m-2.5-6.5L15 7m-6 10l-1.5 1.5m0-13L9 7m6 10l1.5 1.5"/>
+                            </svg>
+                            {{ testing ? 'Running...' : 'Run Test' }}
+                        </button>
                     </div>
                 </div>
 
-                <!-- Active Test Progress -->
-                <div v-if="testing || currentTest" class="bg-dark-800 rounded-2xl border border-dark-600 overflow-hidden">
-                    <div class="p-5 border-b border-dark-700 flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <div :class="[
-                                'w-3 h-3 rounded-full',
-                                testing ? 'bg-amber-400 animate-pulse' : currentTest?.passed ? 'bg-green-400' : 'bg-red-400'
-                            ]"></div>
-                            <span class="font-medium">{{ testing ? 'Test in Progress' : currentTest?.passed ? 'Test Passed' : 'Test Failed' }}</span>
+                <!-- Test Progress -->
+                <div v-if="testSteps.length" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; overflow: hidden;">
+                    <div style="padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span :style="{
+                                width: '8px', height: '8px', borderRadius: '50%',
+                                background: testing ? '#f59e0b' : currentTest?.passed ? '#22c55e' : '#ef4444'
+                            }"></span>
+                            <span style="font-size: 13px; font-weight: 500;">{{ testing ? 'In Progress' : currentTest?.passed ? 'Passed' : 'Issues Found' }}</span>
                         </div>
-                        <span class="text-sm text-gray-400">{{ currentTest?.url }}</span>
+                        <span style="font-size: 12px; color: #666;">{{ currentTest?.url }}</span>
                     </div>
                     
-                    <!-- Test Steps -->
-                    <div class="divide-y divide-dark-700">
-                        <div v-for="(step, i) in testSteps" :key="i" 
-                             class="p-4 flex items-start gap-4">
-                            <div :class="[
-                                'w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0',
-                                step.status === 'done' ? 'bg-green-500/20' : 
-                                step.status === 'running' ? 'bg-amber-500/20' : 
-                                step.status === 'failed' ? 'bg-red-500/20' : 'bg-dark-600'
-                            ]">
-                                <svg v-if="step.status === 'done'" class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    <div style="padding: 8px 0;">
+                        <div v-for="(step, i) in testSteps" :key="i" style="padding: 12px 20px; display: flex; align-items: flex-start; gap: 12px;">
+                            <div :style="{
+                                width: '20px', height: '20px', borderRadius: '6px', flexShrink: 0,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                background: step.status === 'done' ? 'rgba(34,197,94,0.1)' : step.status === 'running' ? 'rgba(245,158,11,0.1)' : step.status === 'failed' ? 'rgba(239,68,68,0.1)' : 'rgba(255,255,255,0.03)'
+                            }">
+                                <svg v-if="step.status === 'done'" style="width: 12px; height: 12px; color: #22c55e;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
                                 </svg>
-                                <svg v-else-if="step.status === 'running'" class="w-4 h-4 text-amber-400 animate-spin" viewBox="0 0 24 24" fill="none">
-                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" class="opacity-25"/>
-                                    <path d="M12 2a10 10 0 0110 10" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                                <svg v-else-if="step.status === 'running'" style="width: 12px; height: 12px; color: #f59e0b; animation: spin 1s linear infinite;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <path d="M12 2v4m0 12v4"/>
                                 </svg>
-                                <svg v-else-if="step.status === 'failed'" class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                <svg v-else-if="step.status === 'failed'" style="width: 12px; height: 12px; color: #ef4444;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
                                 </svg>
-                                <span v-else class="w-2 h-2 bg-dark-400 rounded-full"></span>
+                                <span v-else style="width: 4px; height: 4px; background: #444; border-radius: 50%;"></span>
                             </div>
-                            <div class="flex-1 min-w-0">
-                                <p :class="['font-medium', step.status === 'pending' ? 'text-gray-500' : 'text-white']">{{ step.title }}</p>
-                                <p v-if="step.description" class="text-sm text-gray-400 mt-1">{{ step.description }}</p>
+                            <div style="flex: 1; min-width: 0;">
+                                <p :style="{ fontSize: '13px', color: step.status === 'pending' ? '#444' : '#ccc' }">{{ step.title }}</p>
+                                <p v-if="step.description" style="font-size: 12px; color: #555; margin-top: 2px;">{{ step.description }}</p>
                             </div>
-                            <span v-if="step.duration" class="text-xs text-gray-500">{{ step.duration }}</span>
+                            <span v-if="step.duration" style="font-size: 11px; color: #555;">{{ step.duration }}</span>
                         </div>
                     </div>
 
-                    <!-- Screenshot Preview -->
-                    <div v-if="currentTest?.screenshots?.length" class="p-5 border-t border-dark-700">
-                        <p class="text-sm text-gray-400 mb-3">Screenshots</p>
-                        <div class="flex gap-3 overflow-x-auto pb-2">
+                    <!-- Screenshots -->
+                    <div v-if="currentTest?.screenshots?.length" style="padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.06);">
+                        <p style="font-size: 12px; color: #666; margin-bottom: 12px;">Screenshots</p>
+                        <div style="display: flex; gap: 12px; overflow-x: auto; padding-bottom: 4px;">
                             <div v-for="(ss, i) in currentTest.screenshots" :key="i" 
-                                 class="w-48 h-32 bg-dark-700 rounded-lg flex-shrink-0 overflow-hidden cursor-pointer hover:ring-2 hover:ring-accent transition">
-                                <img :src="ss" class="w-full h-full object-cover">
+                                 style="width: 180px; height: 120px; background: #1a1a1a; border-radius: 8px; flex-shrink: 0; overflow: hidden;">
+                                <img :src="ss" style="width: 100%; height: 100%; object-fit: cover;">
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Summary -->
+                    <div v-if="currentTest?.summary && !testing" style="padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.06);">
+                        <p style="font-size: 12px; color: #666; margin-bottom: 8px;">Summary</p>
+                        <p style="font-size: 13px; color: #999; line-height: 1.6;">{{ currentTest.summary }}</p>
                     </div>
                 </div>
             </div>
 
             <!-- Results Page -->
-            <div v-else-if="currentPage === 'results'" class="p-8">
-                <div class="mb-8">
-                    <h2 class="text-2xl font-bold mb-2">Test Results</h2>
-                    <p class="text-gray-400">History of all test runs</p>
+            <div v-else-if="currentPage === 'results'" style="padding: 32px;">
+                <div style="margin-bottom: 32px;">
+                    <h1 style="font-size: 20px; font-weight: 600; margin-bottom: 4px;">Results</h1>
+                    <p style="color: #666; font-size: 13px;">Test history</p>
                 </div>
 
                 <!-- Stats -->
-                <div class="grid grid-cols-4 gap-4 mb-8">
-                    <div class="bg-dark-800 rounded-xl p-5 border border-dark-600">
-                        <p class="text-sm text-gray-400 mb-1">Total Tests</p>
-                        <p class="text-3xl font-bold">{{ stats.total }}</p>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px;">
+                    <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 20px;">
+                        <p style="font-size: 12px; color: #666; margin-bottom: 8px;">Total</p>
+                        <p style="font-size: 28px; font-weight: 600;">{{ stats.total }}</p>
                     </div>
-                    <div class="bg-dark-800 rounded-xl p-5 border border-dark-600">
-                        <p class="text-sm text-gray-400 mb-1">Passed</p>
-                        <p class="text-3xl font-bold text-green-400">{{ stats.passed }}</p>
+                    <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 20px;">
+                        <p style="font-size: 12px; color: #666; margin-bottom: 8px;">Passed</p>
+                        <p style="font-size: 28px; font-weight: 600; color: #22c55e;">{{ stats.passed }}</p>
                     </div>
-                    <div class="bg-dark-800 rounded-xl p-5 border border-dark-600">
-                        <p class="text-sm text-gray-400 mb-1">Failed</p>
-                        <p class="text-3xl font-bold text-red-400">{{ stats.failed }}</p>
+                    <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 20px;">
+                        <p style="font-size: 12px; color: #666; margin-bottom: 8px;">Failed</p>
+                        <p style="font-size: 28px; font-weight: 600; color: #ef4444;">{{ stats.failed }}</p>
                     </div>
-                    <div class="bg-dark-800 rounded-xl p-5 border border-dark-600">
-                        <p class="text-sm text-gray-400 mb-1">Pass Rate</p>
-                        <p class="text-3xl font-bold text-accent">{{ stats.passRate }}%</p>
+                    <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 20px;">
+                        <p style="font-size: 12px; color: #666; margin-bottom: 8px;">Pass Rate</p>
+                        <p style="font-size: 28px; font-weight: 600;">{{ stats.passRate }}%</p>
                     </div>
                 </div>
 
-                <!-- Results List -->
-                <div class="bg-dark-800 rounded-xl border border-dark-600 overflow-hidden">
-                    <div v-if="testHistory.length === 0" class="p-12 text-center">
-                        <div class="w-16 h-16 mx-auto mb-4 bg-dark-700 rounded-full flex items-center justify-center">
-                            <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                            </svg>
-                        </div>
-                        <p class="text-gray-400">No tests run yet</p>
-                        <button @click="currentPage = 'test'" class="mt-4 text-accent hover:underline">Run your first test →</button>
+                <!-- History -->
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; overflow: hidden;">
+                    <div v-if="testHistory.length === 0" style="padding: 60px; text-align: center;">
+                        <p style="color: #555;">No tests run yet</p>
                     </div>
-                    <div v-else class="divide-y divide-dark-700">
-                        <div v-for="test in testHistory" :key="test.id" 
-                             class="p-5 hover:bg-dark-700/50 transition cursor-pointer">
-                            <div class="flex items-center gap-4">
-                                <div :class="[
-                                    'w-10 h-10 rounded-xl flex items-center justify-center',
-                                    test.passed ? 'bg-green-500/20' : 'bg-red-500/20'
-                                ]">
-                                    <svg v-if="test.passed" class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                    </svg>
-                                    <svg v-else class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                    </svg>
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="font-medium truncate">{{ test.url }}</p>
-                                    <p class="text-sm text-gray-400 truncate">{{ test.description }}</p>
-                                </div>
-                                <div class="text-right">
-                                    <p class="text-sm text-gray-400">{{ test.duration }}</p>
-                                    <p class="text-xs text-gray-500">{{ test.time }}</p>
-                                </div>
+                    <div v-else>
+                        <div v-for="test in testHistory" :key="test.id" style="padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.04); display: flex; align-items: center; gap: 16px;">
+                            <span :style="{
+                                width: '8px', height: '8px', borderRadius: '50%',
+                                background: test.passed ? '#22c55e' : '#ef4444'
+                            }"></span>
+                            <div style="flex: 1; min-width: 0;">
+                                <p style="font-size: 13px; color: #ccc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ test.url }}</p>
+                                <p style="font-size: 12px; color: #555;">{{ test.description }}</p>
+                            </div>
+                            <div style="text-align: right; flex-shrink: 0;">
+                                <p style="font-size: 12px; color: #666;">{{ test.duration }}</p>
+                                <p style="font-size: 11px; color: #444;">{{ test.time }}</p>
                             </div>
                         </div>
                     </div>
@@ -433,127 +335,108 @@
             </div>
 
             <!-- Bugs Page -->
-            <div v-else-if="currentPage === 'bugs'" class="p-8">
-                <div class="mb-8">
-                    <h2 class="text-2xl font-bold mb-2">Bug Reports</h2>
-                    <p class="text-gray-400">Issues discovered during testing</p>
+            <div v-else-if="currentPage === 'bugs'" style="padding: 32px;">
+                <div style="margin-bottom: 32px;">
+                    <h1 style="font-size: 20px; font-weight: 600; margin-bottom: 4px;">Issues</h1>
+                    <p style="color: #666; font-size: 13px;">Bugs discovered during testing</p>
                 </div>
 
-                <div class="bg-dark-800 rounded-xl border border-dark-600 overflow-hidden">
-                    <div v-if="bugs.length === 0" class="p-12 text-center">
-                        <div class="w-16 h-16 mx-auto mb-4 bg-green-500/20 rounded-full flex items-center justify-center">
-                            <svg class="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                        </div>
-                        <p class="text-gray-400">No bugs found yet. That's good news!</p>
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; overflow: hidden;">
+                    <div v-if="bugs.length === 0" style="padding: 60px; text-align: center;">
+                        <p style="color: #555;">No issues found</p>
                     </div>
-                    <div v-else class="divide-y divide-dark-700">
-                        <div v-for="bug in bugs" :key="bug.id" class="p-5">
-                            <div class="flex items-start gap-4">
-                                <span :class="[
-                                    'px-2.5 py-1 rounded-lg text-xs font-semibold uppercase',
-                                    bug.severity === 'critical' ? 'bg-red-500/20 text-red-400' :
-                                    bug.severity === 'high' ? 'bg-orange-500/20 text-orange-400' :
-                                    bug.severity === 'medium' ? 'bg-yellow-500/20 text-yellow-400' :
-                                    'bg-blue-500/20 text-blue-400'
-                                ]">{{ bug.severity }}</span>
-                                <div class="flex-1">
-                                    <p class="font-medium">{{ bug.title }}</p>
-                                    <p class="text-sm text-gray-400 mt-1">{{ bug.description }}</p>
-                                    <p class="text-xs text-gray-500 mt-2">Found {{ bug.time }}</p>
-                                </div>
+                    <div v-else>
+                        <div v-for="bug in bugs" :key="bug.id" style="padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.04);">
+                            <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 8px;">
+                                <span :style="{
+                                    padding: '3px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 500, textTransform: 'uppercase',
+                                    background: bug.severity === 'critical' ? 'rgba(239,68,68,0.15)' : bug.severity === 'high' ? 'rgba(249,115,22,0.15)' : bug.severity === 'medium' ? 'rgba(234,179,8,0.15)' : 'rgba(59,130,246,0.15)',
+                                    color: bug.severity === 'critical' ? '#f87171' : bug.severity === 'high' ? '#fb923c' : bug.severity === 'medium' ? '#facc15' : '#60a5fa'
+                                }">{{ bug.severity }}</span>
+                                <span style="font-size: 13px; font-weight: 500; color: #E8E6E3;">{{ bug.title }}</span>
                             </div>
+                            <p style="font-size: 13px; color: #888; line-height: 1.5;">{{ bug.description }}</p>
+                            <p v-if="bug.recommendation" style="font-size: 12px; color: #666; margin-top: 8px;">
+                                <strong style="color: #888;">Fix:</strong> {{ bug.recommendation }}
+                            </p>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Settings Page -->
-            <div v-else-if="currentPage === 'settings'" class="p-8 max-w-2xl">
-                <div class="mb-8">
-                    <h2 class="text-2xl font-bold mb-2">Settings</h2>
-                    <p class="text-gray-400">Manage your API keys and preferences</p>
+            <div v-else-if="currentPage === 'settings'" style="padding: 32px; max-width: 600px;">
+                <div style="margin-bottom: 32px;">
+                    <h1 style="font-size: 20px; font-weight: 600; margin-bottom: 4px;">Settings</h1>
+                    <p style="color: #666; font-size: 13px;">Manage API credentials</p>
                 </div>
 
-                <div class="space-y-6">
-                    <div class="bg-dark-800 rounded-xl border border-dark-600 p-6">
-                        <h3 class="font-semibold mb-4 flex items-center gap-2">
-                            <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
-                            </svg>
-                            BrowserBase
-                        </h3>
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm text-gray-400 mb-2">API Key</label>
-                                <input v-model="config.browserbaseApiKey" type="password" 
-                                       class="w-full bg-dark-700 border border-dark-500 rounded-lg px-4 py-2.5 text-white focus:border-accent transition">
-                            </div>
-                            <div>
-                                <label class="block text-sm text-gray-400 mb-2">Project ID</label>
-                                <input v-model="config.browserbaseProjectId" type="text"
-                                       class="w-full bg-dark-700 border border-dark-500 rounded-lg px-4 py-2.5 text-white focus:border-accent transition">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-dark-800 rounded-xl border border-dark-600 p-6">
-                        <h3 class="font-semibold mb-4 flex items-center gap-2">
-                            <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
-                            </svg>
-                            Anthropic
-                        </h3>
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 24px; margin-bottom: 16px;">
+                    <h3 style="font-size: 14px; font-weight: 500; margin-bottom: 16px;">BrowserBase</h3>
+                    <div style="display: flex; flex-direction: column; gap: 16px;">
                         <div>
-                            <label class="block text-sm text-gray-400 mb-2">API Key</label>
-                            <input v-model="config.anthropicApiKey" type="password"
-                                   class="w-full bg-dark-700 border border-dark-500 rounded-lg px-4 py-2.5 text-white focus:border-accent transition">
+                            <label style="display: block; font-size: 12px; color: #666; margin-bottom: 6px;">API Key</label>
+                            <input v-model="config.browserbaseApiKey" type="password"
+                                   style="width: 100%; padding: 10px 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; color: #E8E6E3; font-size: 14px;">
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 12px; color: #666; margin-bottom: 6px;">Project ID</label>
+                            <input v-model="config.browserbaseProjectId" type="text"
+                                   style="width: 100%; padding: 10px 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; color: #E8E6E3; font-size: 14px;">
                         </div>
                     </div>
+                </div>
 
-                    <button @click="saveConfig" class="w-full py-3 bg-accent hover:bg-accent-dark rounded-xl font-medium transition">
-                        Save Settings
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+                    <h3 style="font-size: 14px; font-weight: 500; margin-bottom: 16px;">Anthropic</h3>
+                    <div>
+                        <label style="display: block; font-size: 12px; color: #666; margin-bottom: 6px;">API Key</label>
+                        <input v-model="config.anthropicApiKey" type="password"
+                               style="width: 100%; padding: 10px 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; color: #E8E6E3; font-size: 14px;">
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 12px;">
+                    <button @click="saveConfig" style="flex: 1; padding: 12px; background: #E8E6E3; color: #0a0a0a; border: none; border-radius: 8px; font-weight: 500; cursor: pointer;">
+                        Save
                     </button>
-
-                    <button @click="resetConfig" class="w-full py-3 bg-dark-700 hover:bg-dark-600 text-red-400 rounded-xl font-medium transition">
-                        Reset Configuration
+                    <button @click="resetConfig" style="padding: 12px 20px; background: transparent; border: 1px solid rgba(239,68,68,0.3); border-radius: 8px; color: #f87171; cursor: pointer;">
+                        Reset
                     </button>
                 </div>
             </div>
         </main>
     </div>
 
+    <style>
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+
     <script>
         const { createApp, ref, reactive, computed, onMounted } = Vue
 
         createApp({
             setup() {
-                // Setup state
                 const isConfigured = ref(false)
                 const currentSetupStep = ref(0)
-                const setupSteps = ['Welcome', 'BrowserBase', 'AI']
-                
                 const config = reactive({
                     browserbaseApiKey: '',
                     browserbaseProjectId: '',
                     anthropicApiKey: ''
                 })
 
-                // Navigation
                 const currentPage = ref('test')
-                const navItems = computed(() => [
-                    { id: 'test', label: 'Run Test', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>' },
-                    { id: 'results', label: 'Results', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>' },
-                    { id: 'bugs', label: 'Bugs', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>', badge: bugs.value.length || null },
-                    { id: 'settings', label: 'Settings', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>' },
-                ])
+                const navItems = [
+                    { id: 'test', label: 'Run Test', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"/></svg>' },
+                    { id: 'results', label: 'Results', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z"/></svg>' },
+                    { id: 'bugs', label: 'Issues', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>' },
+                    { id: 'settings', label: 'Settings', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>' },
+                ]
 
-                // Test state
                 const testUrl = ref('')
                 const testPrompt = ref('')
                 const testing = ref(false)
-                const testOptions = reactive({ screenshots: true, generateCases: true })
+                const testOptions = reactive({ screenshots: true })
                 const currentTest = ref(null)
                 const testSteps = ref([])
                 const testHistory = ref([])
@@ -562,16 +445,9 @@
                 const stats = computed(() => {
                     const total = testHistory.value.length
                     const passed = testHistory.value.filter(t => t.passed).length
-                    const failed = total - passed
-                    return {
-                        total,
-                        passed,
-                        failed,
-                        passRate: total ? Math.round(passed / total * 100) : 100
-                    }
+                    return { total, passed, failed: total - passed, passRate: total ? Math.round(passed / total * 100) : 100 }
                 })
 
-                // Methods
                 const completeSetup = () => {
                     localStorage.setItem('qa_config', JSON.stringify(config))
                     isConfigured.value = true
@@ -579,128 +455,68 @@
 
                 const saveConfig = () => {
                     localStorage.setItem('qa_config', JSON.stringify(config))
-                    alert('Settings saved!')
                 }
 
                 const resetConfig = () => {
-                    if (confirm('Are you sure? This will clear all settings.')) {
+                    if (confirm('Reset all settings?')) {
                         localStorage.removeItem('qa_config')
                         isConfigured.value = false
                         currentSetupStep.value = 0
-                        config.browserbaseApiKey = ''
-                        config.browserbaseProjectId = ''
-                        config.anthropicApiKey = ''
+                        Object.assign(config, { browserbaseApiKey: '', browserbaseProjectId: '', anthropicApiKey: '' })
                     }
                 }
 
                 const runTest = async () => {
                     if (!testUrl.value) return
                     testing.value = true
-                    
                     const urlToTest = testUrl.value
                     const promptToUse = testPrompt.value
                     
-                    currentTest.value = {
-                        url: urlToTest,
-                        description: promptToUse || 'Exploratory test',
-                        screenshots: []
-                    }
+                    currentTest.value = { url: urlToTest, description: promptToUse || 'General test', screenshots: [] }
                     testSteps.value = []
 
                     try {
-                        // Start the test via API
                         const startRes = await fetch('/api/test', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
-                                url: urlToTest,
-                                prompt: promptToUse,
-                                options: testOptions,
-                                config: {
-                                    browserbaseApiKey: config.browserbaseApiKey,
-                                    browserbaseProjectId: config.browserbaseProjectId,
-                                    anthropicApiKey: config.anthropicApiKey
-                                }
+                                url: urlToTest, prompt: promptToUse, options: testOptions,
+                                config: { browserbaseApiKey: config.browserbaseApiKey, browserbaseProjectId: config.browserbaseProjectId, anthropicApiKey: config.anthropicApiKey }
                             })
                         })
                         
-                        if (!startRes.ok) {
-                            const err = await startRes.json()
-                            throw new Error(err.error || 'Failed to start test')
-                        }
-                        
+                        if (!startRes.ok) throw new Error((await startRes.json()).error || 'Failed to start')
                         const { testId } = await startRes.json()
                         
-                        // Poll for status updates
                         let completed = false
                         while (!completed) {
                             await new Promise(r => setTimeout(r, 1000))
+                            const state = await (await fetch(`/api/test/${testId}`)).json()
                             
-                            const statusRes = await fetch(`/api/test/${testId}`)
-                            if (!statusRes.ok) {
-                                throw new Error('Failed to get test status')
-                            }
-                            
-                            const state = await statusRes.json()
-                            
-                            // Update steps
                             testSteps.value = state.steps || []
+                            if (state.screenshots?.length) currentTest.value.screenshots = state.screenshots.map(s => s.data)
                             
-                            // Update screenshots
-                            if (state.screenshots?.length) {
-                                currentTest.value.screenshots = state.screenshots.map(s => s.data)
-                            }
-                            
-                            // Check if completed
                             if (state.status === 'completed' || state.status === 'error') {
                                 completed = true
+                                if (state.status === 'error') throw new Error(state.error)
                                 
-                                if (state.status === 'error') {
-                                    throw new Error(state.error || 'Test failed')
-                                }
-                                
-                                // Update with final results
                                 currentTest.value.passed = state.passed
                                 currentTest.value.summary = state.summary
-                                currentTest.value.testCases = state.testCases
-                                currentTest.value.passedChecks = state.passedChecks
                                 
-                                // Add to history
                                 testHistory.value.unshift({
-                                    id: testId,
-                                    url: urlToTest,
-                                    description: promptToUse || 'Exploratory test',
-                                    passed: state.passed,
-                                    duration: state.duration,
-                                    time: new Date().toLocaleString(),
-                                    bugs: state.bugs,
-                                    summary: state.summary
+                                    id: testId, url: urlToTest, description: promptToUse || 'General test',
+                                    passed: state.passed, duration: state.duration, time: new Date().toLocaleString()
                                 })
                                 
-                                // Add bugs
                                 if (state.bugs?.length) {
-                                    for (const bug of state.bugs) {
-                                        bugs.value.unshift({
-                                            id: Date.now() + Math.random(),
-                                            severity: bug.severity,
-                                            title: bug.title,
-                                            description: bug.description,
-                                            recommendation: bug.recommendation,
-                                            time: 'just now'
-                                        })
-                                    }
+                                    state.bugs.forEach(bug => bugs.value.unshift({ id: Date.now() + Math.random(), ...bug, time: 'now' }))
                                 }
                             }
                         }
-                    } catch (error) {
-                        console.error('Test error:', error)
-                        alert('Test failed: ' + error.message)
-                        
-                        // Mark current step as failed
-                        const runningStep = testSteps.value.find(s => s.status === 'running')
-                        if (runningStep) {
-                            runningStep.status = 'failed'
-                        }
+                    } catch (e) {
+                        console.error(e)
+                        const step = testSteps.value.find(s => s.status === 'running')
+                        if (step) step.status = 'failed'
                     } finally {
                         testing.value = false
                         testUrl.value = ''
@@ -708,39 +524,15 @@
                     }
                 }
 
-                // Load saved config
                 onMounted(() => {
                     const saved = localStorage.getItem('qa_config')
                     if (saved) {
-                        const parsed = JSON.parse(saved)
-                        Object.assign(config, parsed)
-                        if (config.browserbaseApiKey && config.anthropicApiKey) {
-                            isConfigured.value = true
-                        }
+                        Object.assign(config, JSON.parse(saved))
+                        if (config.browserbaseApiKey && config.anthropicApiKey) isConfigured.value = true
                     }
                 })
 
-                return {
-                    isConfigured,
-                    currentSetupStep,
-                    setupSteps,
-                    config,
-                    currentPage,
-                    navItems,
-                    testUrl,
-                    testPrompt,
-                    testing,
-                    testOptions,
-                    currentTest,
-                    testSteps,
-                    testHistory,
-                    bugs,
-                    stats,
-                    completeSetup,
-                    saveConfig,
-                    resetConfig,
-                    runTest
-                }
+                return { isConfigured, currentSetupStep, config, currentPage, navItems, testUrl, testPrompt, testing, testOptions, currentTest, testSteps, testHistory, bugs, stats, completeSetup, saveConfig, resetConfig, runTest }
             }
         }).mount('#app')
     </script>
