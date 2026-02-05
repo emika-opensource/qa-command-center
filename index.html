@@ -6,18 +6,30 @@
     <title>QA Command Center</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
                     colors: {
                         dark: {
-                            900: '#0a0a0b',
-                            800: '#111113',
+                            950: '#09090b',
+                            900: '#0c0c0e',
+                            800: '#121214',
                             700: '#1a1a1d',
-                            600: '#242428',
-                            500: '#2e2e33',
+                            600: '#232326',
+                            500: '#2c2c30',
+                            400: '#3f3f46',
+                        },
+                        accent: {
+                            DEFAULT: '#8b5cf6',
+                            light: '#a78bfa',
+                            dark: '#7c3aed',
                         }
                     }
                 }
@@ -25,104 +37,267 @@
         }
     </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .gradient-border {
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-            padding: 1px;
-            border-radius: 0.75rem;
-        }
-        .gradient-border-inner {
-            background: #111113;
-            border-radius: 0.7rem;
-        }
-        .glow {
-            box-shadow: 0 0 40px rgba(59, 130, 246, 0.15);
-        }
+        body { font-family: 'Inter', system-ui, sans-serif; }
+        .fade-enter-active, .fade-leave-active { transition: opacity 0.2s ease; }
+        .fade-enter-from, .fade-leave-to { opacity: 0; }
+        .slide-enter-active, .slide-leave-active { transition: all 0.3s ease; }
+        .slide-enter-from { opacity: 0; transform: translateX(20px); }
+        .slide-leave-to { opacity: 0; transform: translateX(-20px); }
+        input:focus, textarea:focus, select:focus { outline: none; }
+        .scrollbar-thin::-webkit-scrollbar { width: 6px; }
+        .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+        .scrollbar-thin::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 3px; }
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: #52525b; }
+        @keyframes pulse-slow { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .animate-pulse-slow { animation: pulse-slow 2s ease-in-out infinite; }
     </style>
 </head>
-<body class="bg-dark-900 text-gray-100 min-h-screen">
-    <div id="app">
-        <!-- Header -->
-        <header class="border-b border-dark-600 bg-dark-800/80 backdrop-blur-sm sticky top-0 z-50">
-            <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+<body class="bg-dark-950 text-gray-100 min-h-screen">
+    <div id="app" class="flex h-screen overflow-hidden">
+        
+        <!-- Setup Wizard Overlay -->
+        <div v-if="!isConfigured" class="fixed inset-0 z-50 bg-dark-950 flex items-center justify-center p-6">
+            <div class="w-full max-w-2xl">
+                <!-- Progress Steps -->
+                <div class="flex items-center justify-center gap-3 mb-12">
+                    <div v-for="(step, i) in setupSteps" :key="i" 
+                         :class="[
+                             'w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-all',
+                             currentSetupStep > i ? 'bg-accent text-white' : 
+                             currentSetupStep === i ? 'bg-accent/20 text-accent border-2 border-accent' : 
+                             'bg-dark-700 text-gray-500'
+                         ]">
+                        <svg v-if="currentSetupStep > i" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        <span v-else>{{ i + 1 }}</span>
+                    </div>
+                </div>
+
+                <!-- Step Content -->
+                <transition name="slide" mode="out-in">
+                    <!-- Step 1: Welcome -->
+                    <div v-if="currentSetupStep === 0" key="step0" class="text-center">
+                        <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-accent to-purple-600 rounded-2xl flex items-center justify-center">
+                            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <h1 class="text-3xl font-bold mb-4">Welcome to QA Command Center</h1>
+                        <p class="text-gray-400 text-lg mb-8 max-w-md mx-auto">
+                            Your AI-powered testing dashboard. Run instant tests, find bugs, and generate test cases automatically.
+                        </p>
+                        <div class="bg-dark-800 rounded-xl p-6 text-left mb-8 border border-dark-600">
+                            <h3 class="font-semibold mb-4 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                What you'll need
+                            </h3>
+                            <ul class="space-y-3 text-gray-400">
+                                <li class="flex items-start gap-3">
+                                    <span class="w-6 h-6 bg-dark-600 rounded flex items-center justify-center flex-shrink-0 mt-0.5">1</span>
+                                    <span><strong class="text-white">BrowserBase API Key</strong> — For running browser tests in the cloud</span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <span class="w-6 h-6 bg-dark-600 rounded flex items-center justify-center flex-shrink-0 mt-0.5">2</span>
+                                    <span><strong class="text-white">Anthropic API Key</strong> — For AI-powered test analysis</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <button @click="currentSetupStep++" class="px-8 py-3 bg-accent hover:bg-accent-dark rounded-lg font-medium transition">
+                            Get Started
+                        </button>
+                    </div>
+
+                    <!-- Step 2: BrowserBase -->
+                    <div v-else-if="currentSetupStep === 1" key="step1">
+                        <div class="text-center mb-8">
+                            <div class="w-16 h-16 mx-auto mb-4 bg-orange-500/20 rounded-xl flex items-center justify-center">
+                                <svg class="w-8 h-8 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+                                </svg>
+                            </div>
+                            <h2 class="text-2xl font-bold mb-2">Connect BrowserBase</h2>
+                            <p class="text-gray-400">BrowserBase runs browser tests in the cloud so we can test any website</p>
+                        </div>
+
+                        <div class="bg-dark-800 rounded-xl p-6 border border-dark-600 mb-6">
+                            <h3 class="font-medium mb-4">How to get your API key:</h3>
+                            <ol class="space-y-3 text-gray-400 text-sm">
+                                <li class="flex items-start gap-3">
+                                    <span class="w-5 h-5 bg-accent/20 text-accent rounded flex items-center justify-center flex-shrink-0 text-xs">1</span>
+                                    <span>Go to <a href="https://www.browserbase.com/sign-up" target="_blank" class="text-accent hover:underline">browserbase.com/sign-up</a> and create a free account</span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <span class="w-5 h-5 bg-accent/20 text-accent rounded flex items-center justify-center flex-shrink-0 text-xs">2</span>
+                                    <span>Go to <a href="https://www.browserbase.com/overview" target="_blank" class="text-accent hover:underline">Overview Dashboard</a></span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <span class="w-5 h-5 bg-accent/20 text-accent rounded flex items-center justify-center flex-shrink-0 text-xs">3</span>
+                                    <span>Copy your <strong class="text-white">API Key</strong> and <strong class="text-white">Project ID</strong> from the right sidebar</span>
+                                </li>
+                            </ol>
+                            <p class="mt-4 text-xs text-gray-500">Free plan includes 60 minutes/month of browser time</p>
+                        </div>
+
+                        <div class="space-y-4 mb-8">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-400 mb-2">BrowserBase API Key</label>
+                                <input v-model="config.browserbaseApiKey" type="password" placeholder="bb_live_..."
+                                       class="w-full bg-dark-700 border border-dark-500 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:border-accent transition">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-400 mb-2">Project ID</label>
+                                <input v-model="config.browserbaseProjectId" type="text" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                                       class="w-full bg-dark-700 border border-dark-500 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:border-accent transition">
+                            </div>
+                        </div>
+
+                        <div class="flex gap-4">
+                            <button @click="currentSetupStep--" class="px-6 py-3 bg-dark-700 hover:bg-dark-600 rounded-lg font-medium transition">
+                                Back
+                            </button>
+                            <button @click="currentSetupStep++" :disabled="!config.browserbaseApiKey || !config.browserbaseProjectId"
+                                    class="flex-1 px-6 py-3 bg-accent hover:bg-accent-dark disabled:bg-dark-600 disabled:text-gray-500 rounded-lg font-medium transition">
+                                Continue
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Anthropic -->
+                    <div v-else-if="currentSetupStep === 2" key="step2">
+                        <div class="text-center mb-8">
+                            <div class="w-16 h-16 mx-auto mb-4 bg-amber-500/20 rounded-xl flex items-center justify-center">
+                                <svg class="w-8 h-8 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                                </svg>
+                            </div>
+                            <h2 class="text-2xl font-bold mb-2">Connect AI</h2>
+                            <p class="text-gray-400">Anthropic's Claude analyzes tests and generates intelligent reports</p>
+                        </div>
+
+                        <div class="bg-dark-800 rounded-xl p-6 border border-dark-600 mb-6">
+                            <h3 class="font-medium mb-4">How to get your API key:</h3>
+                            <ol class="space-y-3 text-gray-400 text-sm">
+                                <li class="flex items-start gap-3">
+                                    <span class="w-5 h-5 bg-accent/20 text-accent rounded flex items-center justify-center flex-shrink-0 text-xs">1</span>
+                                    <span>Go to <a href="https://console.anthropic.com/" target="_blank" class="text-accent hover:underline">console.anthropic.com</a></span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <span class="w-5 h-5 bg-accent/20 text-accent rounded flex items-center justify-center flex-shrink-0 text-xs">2</span>
+                                    <span>Create an account or sign in</span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <span class="w-5 h-5 bg-accent/20 text-accent rounded flex items-center justify-center flex-shrink-0 text-xs">3</span>
+                                    <span>Go to <strong class="text-white">API Keys</strong> and create a new key</span>
+                                </li>
+                            </ol>
+                        </div>
+
+                        <div class="space-y-4 mb-8">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-400 mb-2">Anthropic API Key</label>
+                                <input v-model="config.anthropicApiKey" type="password" placeholder="sk-ant-..."
+                                       class="w-full bg-dark-700 border border-dark-500 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:border-accent transition">
+                            </div>
+                        </div>
+
+                        <div class="flex gap-4">
+                            <button @click="currentSetupStep--" class="px-6 py-3 bg-dark-700 hover:bg-dark-600 rounded-lg font-medium transition">
+                                Back
+                            </button>
+                            <button @click="completeSetup" :disabled="!config.anthropicApiKey"
+                                    class="flex-1 px-6 py-3 bg-accent hover:bg-accent-dark disabled:bg-dark-600 disabled:text-gray-500 rounded-lg font-medium transition">
+                                Complete Setup
+                            </button>
+                        </div>
+                    </div>
+                </transition>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <aside v-if="isConfigured" class="w-64 bg-dark-900 border-r border-dark-700 flex flex-col flex-shrink-0">
+            <!-- Logo -->
+            <div class="p-5 border-b border-dark-700">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-10 h-10 bg-gradient-to-br from-accent to-purple-600 rounded-xl flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                     </div>
                     <div>
-                        <h1 class="text-xl font-semibold">QA Command Center</h1>
-                        <p class="text-xs text-gray-500">AI-Powered Testing Dashboard</p>
+                        <h1 class="font-semibold text-sm">QA Command</h1>
+                        <p class="text-xs text-gray-500">Center</p>
                     </div>
                 </div>
-                <div class="flex items-center gap-4">
-                    <span class="flex items-center gap-2 text-sm text-gray-400">
-                        <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                        AI Ready
+            </div>
+
+            <!-- Navigation -->
+            <nav class="flex-1 p-4 space-y-1">
+                <button v-for="item in navItems" :key="item.id"
+                        @click="currentPage = item.id"
+                        :class="[
+                            'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all',
+                            currentPage === item.id 
+                                ? 'bg-accent/10 text-accent' 
+                                : 'text-gray-400 hover:text-white hover:bg-dark-700'
+                        ]">
+                    <span v-html="item.icon" class="w-5 h-5"></span>
+                    {{ item.label }}
+                    <span v-if="item.badge" class="ml-auto bg-red-500/20 text-red-400 text-xs px-2 py-0.5 rounded-full">
+                        {{ item.badge }}
                     </span>
+                </button>
+            </nav>
+
+            <!-- Status -->
+            <div class="p-4 border-t border-dark-700">
+                <div class="flex items-center gap-2 text-sm text-gray-400">
+                    <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                    AI Ready
                 </div>
             </div>
-        </header>
+        </aside>
 
-        <main class="max-w-7xl mx-auto px-6 py-8">
-            <!-- Quick Test Section -->
-            <section class="mb-12">
-                <h2 class="text-2xl font-semibold mb-6 flex items-center gap-3">
-                    <span class="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                        <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                        </svg>
-                    </span>
-                    Instant Test
-                </h2>
-                
-                <div class="gradient-border glow">
-                    <div class="gradient-border-inner p-6">
-                        <div class="grid md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-400 mb-2">URL to Test</label>
-                                <input 
-                                    v-model="testUrl" 
-                                    type="url" 
-                                    placeholder="https://your-app.com"
-                                    class="w-full bg-dark-700 border border-dark-500 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition"
-                                >
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-400 mb-2">What to Test</label>
-                                <input 
-                                    v-model="testPrompt" 
-                                    type="text" 
-                                    placeholder="Test the login flow and checkout process"
-                                    class="w-full bg-dark-700 border border-dark-500 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition"
-                                >
-                            </div>
+        <!-- Main Content -->
+        <main v-if="isConfigured" class="flex-1 overflow-auto bg-dark-950">
+            <!-- Run Test Page -->
+            <div v-if="currentPage === 'test'" class="p-8 max-w-4xl mx-auto">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold mb-2">Run Test</h2>
+                    <p class="text-gray-400">Enter a URL and describe what you want to test</p>
+                </div>
+
+                <div class="bg-dark-800 rounded-2xl border border-dark-600 p-6 mb-8">
+                    <div class="space-y-5">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">URL to Test</label>
+                            <input v-model="testUrl" type="url" placeholder="https://your-app.com"
+                                   class="w-full bg-dark-700 border border-dark-500 rounded-xl px-4 py-3.5 text-white placeholder-gray-500 focus:border-accent transition text-lg">
                         </div>
-                        <div class="mt-6 flex items-center justify-between">
-                            <div class="flex items-center gap-4 text-sm text-gray-400">
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="checkbox" v-model="takeScreenshots" class="rounded bg-dark-700 border-dark-500 text-blue-500 focus:ring-blue-500">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">What to Test</label>
+                            <textarea v-model="testPrompt" rows="3" placeholder="Test the login flow, try invalid credentials, check error messages..."
+                                      class="w-full bg-dark-700 border border-dark-500 rounded-xl px-4 py-3.5 text-white placeholder-gray-500 focus:border-accent transition resize-none"></textarea>
+                        </div>
+                        <div class="flex items-center justify-between pt-2">
+                            <div class="flex gap-6 text-sm">
+                                <label class="flex items-center gap-2 cursor-pointer text-gray-400 hover:text-white transition">
+                                    <input type="checkbox" v-model="testOptions.screenshots" class="rounded bg-dark-600 border-dark-400 text-accent focus:ring-accent focus:ring-offset-0">
                                     Screenshots
                                 </label>
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="checkbox" v-model="generateTestCases" class="rounded bg-dark-700 border-dark-500 text-blue-500 focus:ring-blue-500">
+                                <label class="flex items-center gap-2 cursor-pointer text-gray-400 hover:text-white transition">
+                                    <input type="checkbox" v-model="testOptions.generateCases" class="rounded bg-dark-600 border-dark-400 text-accent focus:ring-accent focus:ring-offset-0">
                                     Generate Test Cases
                                 </label>
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="checkbox" v-model="reportBugs" class="rounded bg-dark-700 border-dark-500 text-blue-500 focus:ring-blue-500">
-                                    Report Bugs
-                                </label>
                             </div>
-                            <button 
-                                @click="startTest"
-                                :disabled="!testUrl || testing"
-                                class="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg font-medium hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center gap-2"
-                            >
-                                <svg v-if="testing" class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            <button @click="runTest" :disabled="!testUrl || testing"
+                                    class="px-6 py-3 bg-accent hover:bg-accent-dark disabled:bg-dark-600 disabled:text-gray-500 rounded-xl font-medium transition flex items-center gap-2">
+                                <svg v-if="testing" class="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none">
+                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-linecap="round" class="opacity-25"/>
+                                    <path d="M12 2a10 10 0 0110 10" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
                                 </svg>
                                 <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
@@ -133,228 +308,385 @@
                         </div>
                     </div>
                 </div>
-            </section>
 
-            <!-- Stats Grid -->
-            <section class="grid md:grid-cols-4 gap-6 mb-12">
-                <div class="bg-dark-800 rounded-xl p-6 border border-dark-600">
-                    <div class="flex items-center justify-between mb-4">
-                        <span class="text-gray-400 text-sm">Tests Run</span>
-                        <span class="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                            <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <!-- Active Test Progress -->
+                <div v-if="testing || currentTest" class="bg-dark-800 rounded-2xl border border-dark-600 overflow-hidden">
+                    <div class="p-5 border-b border-dark-700 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div :class="[
+                                'w-3 h-3 rounded-full',
+                                testing ? 'bg-amber-400 animate-pulse' : currentTest?.passed ? 'bg-green-400' : 'bg-red-400'
+                            ]"></div>
+                            <span class="font-medium">{{ testing ? 'Test in Progress' : currentTest?.passed ? 'Test Passed' : 'Test Failed' }}</span>
+                        </div>
+                        <span class="text-sm text-gray-400">{{ currentTest?.url }}</span>
+                    </div>
+                    
+                    <!-- Test Steps -->
+                    <div class="divide-y divide-dark-700">
+                        <div v-for="(step, i) in testSteps" :key="i" 
+                             class="p-4 flex items-start gap-4">
+                            <div :class="[
+                                'w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0',
+                                step.status === 'done' ? 'bg-green-500/20' : 
+                                step.status === 'running' ? 'bg-amber-500/20' : 
+                                step.status === 'failed' ? 'bg-red-500/20' : 'bg-dark-600'
+                            ]">
+                                <svg v-if="step.status === 'done'" class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                <svg v-else-if="step.status === 'running'" class="w-4 h-4 text-amber-400 animate-spin" viewBox="0 0 24 24" fill="none">
+                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" class="opacity-25"/>
+                                    <path d="M12 2a10 10 0 0110 10" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                                </svg>
+                                <svg v-else-if="step.status === 'failed'" class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                                <span v-else class="w-2 h-2 bg-dark-400 rounded-full"></span>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p :class="['font-medium', step.status === 'pending' ? 'text-gray-500' : 'text-white']">{{ step.title }}</p>
+                                <p v-if="step.description" class="text-sm text-gray-400 mt-1">{{ step.description }}</p>
+                            </div>
+                            <span v-if="step.duration" class="text-xs text-gray-500">{{ step.duration }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Screenshot Preview -->
+                    <div v-if="currentTest?.screenshots?.length" class="p-5 border-t border-dark-700">
+                        <p class="text-sm text-gray-400 mb-3">Screenshots</p>
+                        <div class="flex gap-3 overflow-x-auto pb-2">
+                            <div v-for="(ss, i) in currentTest.screenshots" :key="i" 
+                                 class="w-48 h-32 bg-dark-700 rounded-lg flex-shrink-0 overflow-hidden cursor-pointer hover:ring-2 hover:ring-accent transition">
+                                <img :src="ss" class="w-full h-full object-cover">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Page -->
+            <div v-else-if="currentPage === 'results'" class="p-8">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold mb-2">Test Results</h2>
+                    <p class="text-gray-400">History of all test runs</p>
+                </div>
+
+                <!-- Stats -->
+                <div class="grid grid-cols-4 gap-4 mb-8">
+                    <div class="bg-dark-800 rounded-xl p-5 border border-dark-600">
+                        <p class="text-sm text-gray-400 mb-1">Total Tests</p>
+                        <p class="text-3xl font-bold">{{ stats.total }}</p>
+                    </div>
+                    <div class="bg-dark-800 rounded-xl p-5 border border-dark-600">
+                        <p class="text-sm text-gray-400 mb-1">Passed</p>
+                        <p class="text-3xl font-bold text-green-400">{{ stats.passed }}</p>
+                    </div>
+                    <div class="bg-dark-800 rounded-xl p-5 border border-dark-600">
+                        <p class="text-sm text-gray-400 mb-1">Failed</p>
+                        <p class="text-3xl font-bold text-red-400">{{ stats.failed }}</p>
+                    </div>
+                    <div class="bg-dark-800 rounded-xl p-5 border border-dark-600">
+                        <p class="text-sm text-gray-400 mb-1">Pass Rate</p>
+                        <p class="text-3xl font-bold text-accent">{{ stats.passRate }}%</p>
+                    </div>
+                </div>
+
+                <!-- Results List -->
+                <div class="bg-dark-800 rounded-xl border border-dark-600 overflow-hidden">
+                    <div v-if="testHistory.length === 0" class="p-12 text-center">
+                        <div class="w-16 h-16 mx-auto mb-4 bg-dark-700 rounded-full flex items-center justify-center">
+                            <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                             </svg>
-                        </span>
-                    </div>
-                    <p class="text-3xl font-bold">{{ stats.testsRun }}</p>
-                </div>
-                <div class="bg-dark-800 rounded-xl p-6 border border-dark-600">
-                    <div class="flex items-center justify-between mb-4">
-                        <span class="text-gray-400 text-sm">Bugs Found</span>
-                        <span class="w-8 h-8 bg-red-500/20 rounded-lg flex items-center justify-center">
-                            <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                        </span>
-                    </div>
-                    <p class="text-3xl font-bold text-red-400">{{ stats.bugsFound }}</p>
-                </div>
-                <div class="bg-dark-800 rounded-xl p-6 border border-dark-600">
-                    <div class="flex items-center justify-between mb-4">
-                        <span class="text-gray-400 text-sm">Test Cases</span>
-                        <span class="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center">
-                            <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                        </span>
-                    </div>
-                    <p class="text-3xl font-bold text-green-400">{{ stats.testCases }}</p>
-                </div>
-                <div class="bg-dark-800 rounded-xl p-6 border border-dark-600">
-                    <div class="flex items-center justify-between mb-4">
-                        <span class="text-gray-400 text-sm">Pass Rate</span>
-                        <span class="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center">
-                            <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
-                            </svg>
-                        </span>
-                    </div>
-                    <p class="text-3xl font-bold text-purple-400">{{ stats.passRate }}%</p>
-                </div>
-            </section>
-
-            <!-- Two Column Layout -->
-            <div class="grid lg:grid-cols-2 gap-8">
-                <!-- Recent Test Results -->
-                <section>
-                    <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
-                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
-                        </svg>
-                        Recent Tests
-                    </h2>
-                    <div class="bg-dark-800 rounded-xl border border-dark-600 overflow-hidden">
-                        <div v-if="recentTests.length === 0" class="p-8 text-center text-gray-500">
-                            <svg class="w-12 h-12 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            <p>No tests yet. Run your first test above!</p>
                         </div>
-                        <div v-else class="divide-y divide-dark-600">
-                            <div v-for="test in recentTests" :key="test.id" class="p-4 hover:bg-dark-700 transition cursor-pointer">
-                                <div class="flex items-center justify-between mb-2">
-                                    <span class="font-medium truncate flex-1 mr-4">{{ test.url }}</span>
-                                    <span :class="test.passed ? 'text-green-400' : 'text-red-400'" class="text-sm font-medium">
-                                        {{ test.passed ? 'Passed' : 'Failed' }}
-                                    </span>
+                        <p class="text-gray-400">No tests run yet</p>
+                        <button @click="currentPage = 'test'" class="mt-4 text-accent hover:underline">Run your first test →</button>
+                    </div>
+                    <div v-else class="divide-y divide-dark-700">
+                        <div v-for="test in testHistory" :key="test.id" 
+                             class="p-5 hover:bg-dark-700/50 transition cursor-pointer">
+                            <div class="flex items-center gap-4">
+                                <div :class="[
+                                    'w-10 h-10 rounded-xl flex items-center justify-center',
+                                    test.passed ? 'bg-green-500/20' : 'bg-red-500/20'
+                                ]">
+                                    <svg v-if="test.passed" class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                    <svg v-else class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
                                 </div>
-                                <p class="text-sm text-gray-400 truncate">{{ test.description }}</p>
-                                <p class="text-xs text-gray-500 mt-1">{{ test.time }}</p>
+                                <div class="flex-1 min-w-0">
+                                    <p class="font-medium truncate">{{ test.url }}</p>
+                                    <p class="text-sm text-gray-400 truncate">{{ test.description }}</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-sm text-gray-400">{{ test.duration }}</p>
+                                    <p class="text-xs text-gray-500">{{ test.time }}</p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </section>
-
-                <!-- Bug Reports -->
-                <section>
-                    <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
-                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        Bug Reports
-                    </h2>
-                    <div class="bg-dark-800 rounded-xl border border-dark-600 overflow-hidden">
-                        <div v-if="bugs.length === 0" class="p-8 text-center text-gray-500">
-                            <svg class="w-12 h-12 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            <p>No bugs found yet. That's good news!</p>
-                        </div>
-                        <div v-else class="divide-y divide-dark-600">
-                            <div v-for="bug in bugs" :key="bug.id" class="p-4 hover:bg-dark-700 transition cursor-pointer">
-                                <div class="flex items-center gap-3 mb-2">
-                                    <span :class="{
-                                        'bg-red-500/20 text-red-400': bug.severity === 'critical',
-                                        'bg-orange-500/20 text-orange-400': bug.severity === 'high',
-                                        'bg-yellow-500/20 text-yellow-400': bug.severity === 'medium',
-                                        'bg-blue-500/20 text-blue-400': bug.severity === 'low'
-                                    }" class="px-2 py-0.5 rounded text-xs font-medium uppercase">
-                                        {{ bug.severity }}
-                                    </span>
-                                    <span class="font-medium truncate flex-1">{{ bug.title }}</span>
-                                </div>
-                                <p class="text-sm text-gray-400 truncate">{{ bug.description }}</p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+                </div>
             </div>
 
-            <!-- Test Instructions -->
-            <section class="mt-12 bg-dark-800 rounded-xl border border-dark-600 p-8">
-                <h2 class="text-xl font-semibold mb-4">🤖 How This Works</h2>
-                <div class="grid md:grid-cols-3 gap-8 text-gray-400">
-                    <div>
-                        <div class="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center mb-4">
-                            <span class="text-blue-400 font-bold">1</span>
+            <!-- Bugs Page -->
+            <div v-else-if="currentPage === 'bugs'" class="p-8">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold mb-2">Bug Reports</h2>
+                    <p class="text-gray-400">Issues discovered during testing</p>
+                </div>
+
+                <div class="bg-dark-800 rounded-xl border border-dark-600 overflow-hidden">
+                    <div v-if="bugs.length === 0" class="p-12 text-center">
+                        <div class="w-16 h-16 mx-auto mb-4 bg-green-500/20 rounded-full flex items-center justify-center">
+                            <svg class="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
                         </div>
-                        <h3 class="text-white font-medium mb-2">Enter URL & Instructions</h3>
-                        <p class="text-sm">Paste any URL and describe what you want tested. Be as specific or general as you like.</p>
+                        <p class="text-gray-400">No bugs found yet. That's good news!</p>
                     </div>
-                    <div>
-                        <div class="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center mb-4">
-                            <span class="text-purple-400 font-bold">2</span>
+                    <div v-else class="divide-y divide-dark-700">
+                        <div v-for="bug in bugs" :key="bug.id" class="p-5">
+                            <div class="flex items-start gap-4">
+                                <span :class="[
+                                    'px-2.5 py-1 rounded-lg text-xs font-semibold uppercase',
+                                    bug.severity === 'critical' ? 'bg-red-500/20 text-red-400' :
+                                    bug.severity === 'high' ? 'bg-orange-500/20 text-orange-400' :
+                                    bug.severity === 'medium' ? 'bg-yellow-500/20 text-yellow-400' :
+                                    'bg-blue-500/20 text-blue-400'
+                                ]">{{ bug.severity }}</span>
+                                <div class="flex-1">
+                                    <p class="font-medium">{{ bug.title }}</p>
+                                    <p class="text-sm text-gray-400 mt-1">{{ bug.description }}</p>
+                                    <p class="text-xs text-gray-500 mt-2">Found {{ bug.time }}</p>
+                                </div>
+                            </div>
                         </div>
-                        <h3 class="text-white font-medium mb-2">AI Runs Tests</h3>
-                        <p class="text-sm">Your AI QA Engineer uses Playwright to control a real browser, clicking through flows and looking for issues.</p>
-                    </div>
-                    <div>
-                        <div class="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center mb-4">
-                            <span class="text-green-400 font-bold">3</span>
-                        </div>
-                        <h3 class="text-white font-medium mb-2">Get Results</h3>
-                        <p class="text-sm">Receive detailed bug reports with screenshots, test cases, and recommendations for fixing issues.</p>
                     </div>
                 </div>
-            </section>
+            </div>
+
+            <!-- Settings Page -->
+            <div v-else-if="currentPage === 'settings'" class="p-8 max-w-2xl">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold mb-2">Settings</h2>
+                    <p class="text-gray-400">Manage your API keys and preferences</p>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="bg-dark-800 rounded-xl border border-dark-600 p-6">
+                        <h3 class="font-semibold mb-4 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+                            </svg>
+                            BrowserBase
+                        </h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm text-gray-400 mb-2">API Key</label>
+                                <input v-model="config.browserbaseApiKey" type="password" 
+                                       class="w-full bg-dark-700 border border-dark-500 rounded-lg px-4 py-2.5 text-white focus:border-accent transition">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-400 mb-2">Project ID</label>
+                                <input v-model="config.browserbaseProjectId" type="text"
+                                       class="w-full bg-dark-700 border border-dark-500 rounded-lg px-4 py-2.5 text-white focus:border-accent transition">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-dark-800 rounded-xl border border-dark-600 p-6">
+                        <h3 class="font-semibold mb-4 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                            </svg>
+                            Anthropic
+                        </h3>
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-2">API Key</label>
+                            <input v-model="config.anthropicApiKey" type="password"
+                                   class="w-full bg-dark-700 border border-dark-500 rounded-lg px-4 py-2.5 text-white focus:border-accent transition">
+                        </div>
+                    </div>
+
+                    <button @click="saveConfig" class="w-full py-3 bg-accent hover:bg-accent-dark rounded-xl font-medium transition">
+                        Save Settings
+                    </button>
+
+                    <button @click="resetConfig" class="w-full py-3 bg-dark-700 hover:bg-dark-600 text-red-400 rounded-xl font-medium transition">
+                        Reset Configuration
+                    </button>
+                </div>
+            </div>
         </main>
-
-        <!-- Footer -->
-        <footer class="border-t border-dark-600 mt-12 py-6">
-            <div class="max-w-7xl mx-auto px-6 text-center text-gray-500 text-sm">
-                <p>QA Command Center • Powered by your AI QA Engineer</p>
-            </div>
-        </footer>
     </div>
 
     <script>
-        const { createApp, ref, reactive } = Vue
+        const { createApp, ref, reactive, computed, onMounted } = Vue
 
         createApp({
             setup() {
+                // Setup state
+                const isConfigured = ref(false)
+                const currentSetupStep = ref(0)
+                const setupSteps = ['Welcome', 'BrowserBase', 'AI']
+                
+                const config = reactive({
+                    browserbaseApiKey: '',
+                    browserbaseProjectId: '',
+                    anthropicApiKey: ''
+                })
+
+                // Navigation
+                const currentPage = ref('test')
+                const navItems = computed(() => [
+                    { id: 'test', label: 'Run Test', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>' },
+                    { id: 'results', label: 'Results', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>' },
+                    { id: 'bugs', label: 'Bugs', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>', badge: bugs.value.length || null },
+                    { id: 'settings', label: 'Settings', icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>' },
+                ])
+
+                // Test state
                 const testUrl = ref('')
                 const testPrompt = ref('')
                 const testing = ref(false)
-                const takeScreenshots = ref(true)
-                const generateTestCases = ref(true)
-                const reportBugs = ref(true)
-
-                const stats = reactive({
-                    testsRun: 0,
-                    bugsFound: 0,
-                    testCases: 0,
-                    passRate: 100
-                })
-
-                const recentTests = ref([])
+                const testOptions = reactive({ screenshots: true, generateCases: true })
+                const currentTest = ref(null)
+                const testSteps = ref([])
+                const testHistory = ref([])
                 const bugs = ref([])
 
-                const startTest = async () => {
+                const stats = computed(() => {
+                    const total = testHistory.value.length
+                    const passed = testHistory.value.filter(t => t.passed).length
+                    const failed = total - passed
+                    return {
+                        total,
+                        passed,
+                        failed,
+                        passRate: total ? Math.round(passed / total * 100) : 100
+                    }
+                })
+
+                // Methods
+                const completeSetup = () => {
+                    localStorage.setItem('qa_config', JSON.stringify(config))
+                    isConfigured.value = true
+                }
+
+                const saveConfig = () => {
+                    localStorage.setItem('qa_config', JSON.stringify(config))
+                    alert('Settings saved!')
+                }
+
+                const resetConfig = () => {
+                    if (confirm('Are you sure? This will clear all settings.')) {
+                        localStorage.removeItem('qa_config')
+                        isConfigured.value = false
+                        currentSetupStep.value = 0
+                        config.browserbaseApiKey = ''
+                        config.browserbaseProjectId = ''
+                        config.anthropicApiKey = ''
+                    }
+                }
+
+                const runTest = async () => {
                     if (!testUrl.value) return
                     testing.value = true
+                    
+                    currentTest.value = {
+                        url: testUrl.value,
+                        description: testPrompt.value || 'Exploratory test',
+                        screenshots: []
+                    }
 
-                    // Simulate test (in real implementation, this would call your AI backend)
-                    await new Promise(resolve => setTimeout(resolve, 3000))
+                    // Simulate test steps
+                    const steps = [
+                        { title: 'Initializing browser session', description: 'Connecting to BrowserBase...' },
+                        { title: 'Loading page', description: testUrl.value },
+                        { title: 'Analyzing page structure', description: 'Identifying interactive elements...' },
+                        { title: 'Running test scenarios', description: testPrompt.value || 'Exploring main features...' },
+                        { title: 'Capturing screenshots', description: 'Documenting current state...' },
+                        { title: 'Analyzing results', description: 'AI is reviewing findings...' },
+                        { title: 'Generating report', description: 'Compiling test results...' },
+                    ]
 
-                    // Add mock result
-                    const passed = Math.random() > 0.3
-                    recentTests.value.unshift({
+                    testSteps.value = steps.map(s => ({ ...s, status: 'pending' }))
+
+                    for (let i = 0; i < steps.length; i++) {
+                        testSteps.value[i].status = 'running'
+                        await new Promise(r => setTimeout(r, 800 + Math.random() * 600))
+                        testSteps.value[i].status = 'done'
+                        testSteps.value[i].duration = `${(0.5 + Math.random() * 1.5).toFixed(1)}s`
+                    }
+
+                    // Simulate result
+                    const passed = Math.random() > 0.35
+                    currentTest.value.passed = passed
+                    currentTest.value.screenshots = [
+                        'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300"><rect fill="#1a1a1d" width="400" height="300"/><text x="200" y="150" text-anchor="middle" fill="#666" font-family="sans-serif">Screenshot 1</text></svg>'),
+                        'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300"><rect fill="#1a1a1d" width="400" height="300"/><text x="200" y="150" text-anchor="middle" fill="#666" font-family="sans-serif">Screenshot 2</text></svg>'),
+                    ]
+
+                    testHistory.value.unshift({
                         id: Date.now(),
                         url: testUrl.value,
-                        description: testPrompt.value || 'General exploration test',
+                        description: testPrompt.value || 'Exploratory test',
                         passed,
+                        duration: `${(3 + Math.random() * 4).toFixed(1)}s`,
                         time: new Date().toLocaleString()
                     })
 
-                    stats.testsRun++
                     if (!passed) {
-                        stats.bugsFound++
                         bugs.value.unshift({
                             id: Date.now(),
                             severity: ['critical', 'high', 'medium', 'low'][Math.floor(Math.random() * 4)],
-                            title: 'Sample bug found during test',
-                            description: `Issue discovered while testing ${testUrl.value}`
+                            title: `Issue found on ${new URL(testUrl.value).hostname}`,
+                            description: 'Element not responding as expected during interaction test',
+                            time: 'just now'
                         })
                     }
-                    stats.testCases += Math.floor(Math.random() * 5) + 1
-                    stats.passRate = Math.round((stats.testsRun - stats.bugsFound) / stats.testsRun * 100)
 
                     testing.value = false
                     testUrl.value = ''
                     testPrompt.value = ''
                 }
 
+                // Load saved config
+                onMounted(() => {
+                    const saved = localStorage.getItem('qa_config')
+                    if (saved) {
+                        const parsed = JSON.parse(saved)
+                        Object.assign(config, parsed)
+                        if (config.browserbaseApiKey && config.anthropicApiKey) {
+                            isConfigured.value = true
+                        }
+                    }
+                })
+
                 return {
+                    isConfigured,
+                    currentSetupStep,
+                    setupSteps,
+                    config,
+                    currentPage,
+                    navItems,
                     testUrl,
                     testPrompt,
                     testing,
-                    takeScreenshots,
-                    generateTestCases,
-                    reportBugs,
-                    stats,
-                    recentTests,
+                    testOptions,
+                    currentTest,
+                    testSteps,
+                    testHistory,
                     bugs,
-                    startTest
+                    stats,
+                    completeSetup,
+                    saveConfig,
+                    resetConfig,
+                    runTest
                 }
             }
         }).mount('#app')

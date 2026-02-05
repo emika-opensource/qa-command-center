@@ -1,56 +1,76 @@
 # QA Command Center
 
-> AI-Powered Testing Dashboard for your QA Engineer AI Employee
+> AI-powered QA testing dashboard with BrowserBase integration
 
-![QA Command Center](https://img.shields.io/badge/AI-Powered-blue?style=for-the-badge)
-![Status](https://img.shields.io/badge/Status-Active-green?style=for-the-badge)
+![QA Command Center](https://img.shields.io/badge/AI-Powered-8b5cf6?style=for-the-badge)
+![BrowserBase](https://img.shields.io/badge/BrowserBase-Enabled-f97316?style=for-the-badge)
 
 ## Features
 
 ### 🚀 Instant Testing
 - Paste any URL and describe what to test
-- AI runs tests using Playwright browser automation
-- Get results with screenshots and evidence
+- AI runs tests in real browsers via BrowserBase
+- Watch test progress with detailed steps
+- Get screenshots at each stage
 
-### 🐛 Bug Detection
-- Automatic bug discovery during exploratory testing
+### 🐛 Automatic Bug Detection
+- AI analyzes pages for issues
 - Severity classification (Critical/High/Medium/Low)
 - Detailed reproduction steps
+- Evidence with screenshots
 
-### 📋 Test Case Generation
-- AI generates comprehensive test cases
-- Cover happy paths, error paths, and edge cases
-- Export to your test management tool
+### 📊 Results Dashboard
+- Track all test runs
+- View pass/fail rates
+- Historical trends
+- Export reports
 
-### 📊 Dashboard
-- Track test runs and pass rates
-- View bug trends over time
-- Monitor test coverage
+## Setup
+
+When you first open QA Command Center, you'll be guided through setup:
+
+### 1. BrowserBase API Key
+BrowserBase runs browser tests in the cloud.
+
+1. Go to [browserbase.com/sign-up](https://www.browserbase.com/sign-up)
+2. Create a free account (60 min/month free)
+3. Copy your **API Key** and **Project ID** from the dashboard
+
+### 2. Anthropic API Key
+Claude AI analyzes tests and generates intelligent reports.
+
+1. Go to [console.anthropic.com](https://console.anthropic.com/)
+2. Create an account or sign in
+3. Go to **API Keys** and create a new key
 
 ## How It Works
 
-1. **Enter URL** - Paste the URL of the app you want to test
-2. **Describe Test** - Tell the AI what to focus on (or leave blank for general exploration)
-3. **Get Results** - Receive bug reports, screenshots, and test cases
+1. **Enter URL** — Paste the URL of what you want to test
+2. **Describe Test** — Tell the AI what to focus on (or leave blank for exploration)
+3. **Watch Progress** — See each step as the browser navigates and tests
+4. **Get Results** — Receive bug reports, screenshots, and recommendations
 
 ## Tech Stack
 
 - **Frontend**: Vue 3 + Tailwind CSS
-- **Testing Engine**: Playwright (via AI Employee)
-- **AI**: Claude-powered QA analysis
+- **Browser Automation**: BrowserBase (cloud browsers)
+- **AI Analysis**: Claude (Anthropic)
 
 ## For Your AI Employee
 
-This dashboard is designed to work with your QA Engineer AI Employee. The AI can:
+This dashboard works with your QA Engineer AI Employee:
 
 - Run tests on demand through chat
-- Update this dashboard with results
-- Generate and file bug reports
-- Create automated Playwright tests
+- Results sync to this dashboard
+- AI can file bugs directly to your tracker
+- Generate automated Playwright tests
 
-## Getting Started
+## Design
 
-This site is automatically deployed when you install the QA Engineer Image. Access it at your Emika server URL.
+- 🌙 Dark theme throughout
+- 📱 Responsive layout
+- 🎨 Calm, minimal aesthetic
+- ⚡ Fast and lightweight
 
 ## License
 
