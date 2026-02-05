@@ -597,62 +597,115 @@
                     if (!testUrl.value) return
                     testing.value = true
                     
+                    const urlToTest = testUrl.value
+                    const promptToUse = testPrompt.value
+                    
                     currentTest.value = {
-                        url: testUrl.value,
-                        description: testPrompt.value || 'Exploratory test',
+                        url: urlToTest,
+                        description: promptToUse || 'Exploratory test',
                         screenshots: []
                     }
+                    testSteps.value = []
 
-                    // Simulate test steps
-                    const steps = [
-                        { title: 'Initializing browser session', description: 'Connecting to BrowserBase...' },
-                        { title: 'Loading page', description: testUrl.value },
-                        { title: 'Analyzing page structure', description: 'Identifying interactive elements...' },
-                        { title: 'Running test scenarios', description: testPrompt.value || 'Exploring main features...' },
-                        { title: 'Capturing screenshots', description: 'Documenting current state...' },
-                        { title: 'Analyzing results', description: 'AI is reviewing findings...' },
-                        { title: 'Generating report', description: 'Compiling test results...' },
-                    ]
-
-                    testSteps.value = steps.map(s => ({ ...s, status: 'pending' }))
-
-                    for (let i = 0; i < steps.length; i++) {
-                        testSteps.value[i].status = 'running'
-                        await new Promise(r => setTimeout(r, 800 + Math.random() * 600))
-                        testSteps.value[i].status = 'done'
-                        testSteps.value[i].duration = `${(0.5 + Math.random() * 1.5).toFixed(1)}s`
-                    }
-
-                    // Simulate result
-                    const passed = Math.random() > 0.35
-                    currentTest.value.passed = passed
-                    currentTest.value.screenshots = [
-                        'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300"><rect fill="#1a1a1d" width="400" height="300"/><text x="200" y="150" text-anchor="middle" fill="#666" font-family="sans-serif">Screenshot 1</text></svg>'),
-                        'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300"><rect fill="#1a1a1d" width="400" height="300"/><text x="200" y="150" text-anchor="middle" fill="#666" font-family="sans-serif">Screenshot 2</text></svg>'),
-                    ]
-
-                    testHistory.value.unshift({
-                        id: Date.now(),
-                        url: testUrl.value,
-                        description: testPrompt.value || 'Exploratory test',
-                        passed,
-                        duration: `${(3 + Math.random() * 4).toFixed(1)}s`,
-                        time: new Date().toLocaleString()
-                    })
-
-                    if (!passed) {
-                        bugs.value.unshift({
-                            id: Date.now(),
-                            severity: ['critical', 'high', 'medium', 'low'][Math.floor(Math.random() * 4)],
-                            title: `Issue found on ${new URL(testUrl.value).hostname}`,
-                            description: 'Element not responding as expected during interaction test',
-                            time: 'just now'
+                    try {
+                        // Start the test via API
+                        const startRes = await fetch('/api/test', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                url: urlToTest,
+                                prompt: promptToUse,
+                                options: testOptions,
+                                config: {
+                                    browserbaseApiKey: config.browserbaseApiKey,
+                                    browserbaseProjectId: config.browserbaseProjectId,
+                                    anthropicApiKey: config.anthropicApiKey
+                                }
+                            })
                         })
+                        
+                        if (!startRes.ok) {
+                            const err = await startRes.json()
+                            throw new Error(err.error || 'Failed to start test')
+                        }
+                        
+                        const { testId } = await startRes.json()
+                        
+                        // Poll for status updates
+                        let completed = false
+                        while (!completed) {
+                            await new Promise(r => setTimeout(r, 1000))
+                            
+                            const statusRes = await fetch(`/api/test/${testId}`)
+                            if (!statusRes.ok) {
+                                throw new Error('Failed to get test status')
+                            }
+                            
+                            const state = await statusRes.json()
+                            
+                            // Update steps
+                            testSteps.value = state.steps || []
+                            
+                            // Update screenshots
+                            if (state.screenshots?.length) {
+                                currentTest.value.screenshots = state.screenshots.map(s => s.data)
+                            }
+                            
+                            // Check if completed
+                            if (state.status === 'completed' || state.status === 'error') {
+                                completed = true
+                                
+                                if (state.status === 'error') {
+                                    throw new Error(state.error || 'Test failed')
+                                }
+                                
+                                // Update with final results
+                                currentTest.value.passed = state.passed
+                                currentTest.value.summary = state.summary
+                                currentTest.value.testCases = state.testCases
+                                currentTest.value.passedChecks = state.passedChecks
+                                
+                                // Add to history
+                                testHistory.value.unshift({
+                                    id: testId,
+                                    url: urlToTest,
+                                    description: promptToUse || 'Exploratory test',
+                                    passed: state.passed,
+                                    duration: state.duration,
+                                    time: new Date().toLocaleString(),
+                                    bugs: state.bugs,
+                                    summary: state.summary
+                                })
+                                
+                                // Add bugs
+                                if (state.bugs?.length) {
+                                    for (const bug of state.bugs) {
+                                        bugs.value.unshift({
+                                            id: Date.now() + Math.random(),
+                                            severity: bug.severity,
+                                            title: bug.title,
+                                            description: bug.description,
+                                            recommendation: bug.recommendation,
+                                            time: 'just now'
+                                        })
+                                    }
+                                }
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Test error:', error)
+                        alert('Test failed: ' + error.message)
+                        
+                        // Mark current step as failed
+                        const runningStep = testSteps.value.find(s => s.status === 'running')
+                        if (runningStep) {
+                            runningStep.status = 'failed'
+                        }
+                    } finally {
+                        testing.value = false
+                        testUrl.value = ''
+                        testPrompt.value = ''
                     }
-
-                    testing.value = false
-                    testUrl.value = ''
-                    testPrompt.value = ''
                 }
 
                 // Load saved config

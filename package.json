@@ -1,11 +1,18 @@
 {
   "name": "qa-command-center",
   "version": "1.0.0",
-  "description": "AI-Powered QA Testing Dashboard",
+  "description": "AI-Powered QA Testing Dashboard with BrowserBase",
+  "main": "server.js",
   "scripts": {
-    "start": "npx serve -l 3000 -s .",
-    "dev": "npx serve -l 3000 -s ."
+    "start": "node server.js",
+    "dev": "node server.js"
   },
-  "keywords": ["qa", "testing", "ai", "playwright", "automation"],
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "playwright-core": "^1.40.0",
+    "@anthropic-ai/sdk": "^0.20.0"
+  },
+  "keywords": ["qa", "testing", "ai", "playwright", "browserbase", "automation"],
   "license": "MIT"
 }

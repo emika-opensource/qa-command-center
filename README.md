@@ -1,76 +1,122 @@
 # QA Command Center
 
-> AI-powered QA testing dashboard with BrowserBase integration
+> AI-powered QA testing dashboard with real BrowserBase execution and Claude analysis
 
 ![QA Command Center](https://img.shields.io/badge/AI-Powered-8b5cf6?style=for-the-badge)
 ![BrowserBase](https://img.shields.io/badge/BrowserBase-Enabled-f97316?style=for-the-badge)
+![Real Testing](https://img.shields.io/badge/Real-Browser_Tests-22c55e?style=for-the-badge)
 
 ## Features
 
-### 🚀 Instant Testing
-- Paste any URL and describe what to test
-- AI runs tests in real browsers via BrowserBase
-- Watch test progress with detailed steps
-- Get screenshots at each stage
+### 🚀 Real Browser Testing
+- Runs actual browser sessions via BrowserBase cloud
+- Uses Playwright for reliable automation
+- Real screenshots captured during testing
 
-### 🐛 Automatic Bug Detection
-- AI analyzes pages for issues
-- Severity classification (Critical/High/Medium/Low)
-- Detailed reproduction steps
-- Evidence with screenshots
+### 🤖 AI-Powered Analysis
+- Claude analyzes pages for bugs and issues
+- Automatic severity classification
+- Generates test cases and recommendations
 
-### 📊 Results Dashboard
-- Track all test runs
-- View pass/fail rates
-- Historical trends
-- Export reports
-
-## Setup
-
-When you first open QA Command Center, you'll be guided through setup:
-
-### 1. BrowserBase API Key
-BrowserBase runs browser tests in the cloud.
-
-1. Go to [browserbase.com/sign-up](https://www.browserbase.com/sign-up)
-2. Create a free account (60 min/month free)
-3. Copy your **API Key** and **Project ID** from the dashboard
-
-### 2. Anthropic API Key
-Claude AI analyzes tests and generates intelligent reports.
-
-1. Go to [console.anthropic.com](https://console.anthropic.com/)
-2. Create an account or sign in
-3. Go to **API Keys** and create a new key
+### 📊 Live Progress Tracking
+- Watch each test step as it executes
+- Real-time status updates
+- Duration tracking for each step
 
 ## How It Works
 
-1. **Enter URL** — Paste the URL of what you want to test
-2. **Describe Test** — Tell the AI what to focus on (or leave blank for exploration)
-3. **Watch Progress** — See each step as the browser navigates and tests
-4. **Get Results** — Receive bug reports, screenshots, and recommendations
+1. **Connects to BrowserBase** — Starts a real cloud browser session
+2. **Navigates to URL** — Loads your page in the browser
+3. **Captures Screenshots** — Takes visual evidence
+4. **Analyzes Structure** — Extracts interactive elements, forms, images
+5. **AI Review** — Claude analyzes for bugs, accessibility issues, UX problems
+6. **Generates Report** — Compiles findings with recommendations
 
-## Tech Stack
+## Setup
 
-- **Frontend**: Vue 3 + Tailwind CSS
-- **Browser Automation**: BrowserBase (cloud browsers)
-- **AI Analysis**: Claude (Anthropic)
+### Prerequisites
 
-## For Your AI Employee
+**BrowserBase Account** (for cloud browser testing)
+1. Go to [browserbase.com/sign-up](https://www.browserbase.com/sign-up)
+2. Create account (60 min/month free)
+3. Copy your **API Key** and **Project ID**
 
-This dashboard works with your QA Engineer AI Employee:
+**Anthropic API Key** (for AI analysis)
+1. Go to [console.anthropic.com](https://console.anthropic.com/)
+2. Create account or sign in
+3. Generate an API key
 
-- Run tests on demand through chat
-- Results sync to this dashboard
-- AI can file bugs directly to your tracker
-- Generate automated Playwright tests
+### Running Locally
 
-## Design
+```bash
+# Install dependencies
+npm install
 
-- 🌙 Dark theme throughout
-- 📱 Responsive layout
-- 🎨 Calm, minimal aesthetic
-- ⚡ Fast and lightweight
+# Start server
+npm start
+```
+
+Open http://localhost:3000
+
+### Environment
+
+The app stores credentials in localStorage. For server deployment, you can also set:
+- `BROWSERBASE_API_KEY`
+- `BROWSERBASE_PROJECT_ID`  
+- `ANTHROPIC_API_KEY`
+
+## Architecture
+
+```
+┌─────────────────┐
+│   Frontend      │  Vue 3 + Tailwind
+│   (index.html)  │  Dark theme UI
+└────────┬────────┘
+         │ REST API
+┌────────▼────────┐
+│   Backend       │  Express.js
+│   (server.js)   │  Test orchestration
+└────────┬────────┘
+         │
+    ┌────┴────┐
+    │         │
+┌───▼───┐ ┌───▼───┐
+│Browser│ │Claude │
+│Base   │ │ API   │
+│(Cloud)│ │(AI)   │
+└───────┘ └───────┘
+```
+
+## API Endpoints
+
+### POST /api/test
+Start a new test
+```json
+{
+  "url": "https://example.com",
+  "prompt": "Test the login flow",
+  "config": {
+    "browserbaseApiKey": "...",
+    "browserbaseProjectId": "...",
+    "anthropicApiKey": "..."
+  }
+}
+```
+
+### GET /api/test/:testId
+Get test status and results
+
+### GET /api/health
+Health check
+
+## What Claude Analyzes
+
+- **Broken Images** — Images that failed to load
+- **Missing Alt Text** — Accessibility issues
+- **Form Validation** — Required fields, input types
+- **Navigation** — Broken links, unclear CTAs
+- **UX Issues** — Confusing layouts, missing feedback
+- **Performance Indicators** — Large images, slow elements
 
 ## License
 
