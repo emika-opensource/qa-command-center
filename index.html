@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QA Command Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            900: '#0a0a0b',
+                            800: '#111113',
+                            700: '#1a1a1d',
+                            600: '#242428',
+                            500: '#2e2e33',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-border {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            padding: 1px;
+            border-radius: 0.75rem;
+        }
+        .gradient-border-inner {
+            background: #111113;
+            border-radius: 0.7rem;
+        }
+        .glow {
+            box-shadow: 0 0 40px rgba(59, 130, 246, 0.15);
+        }
+    </style>
+</head>
+<body class="bg-dark-900 text-gray-100 min-h-screen">
+    <div id="app">
+        <!-- Header -->
+        <header class="border-b border-dark-600 bg-dark-800/80 backdrop-blur-sm sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-semibold">QA Command Center</h1>
+                        <p class="text-xs text-gray-500">AI-Powered Testing Dashboard</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span class="flex items-center gap-2 text-sm text-gray-400">
+                        <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                        AI Ready
+                    </span>
+                </div>
+            </div>
+        </header>
+
+        <main class="max-w-7xl mx-auto px-6 py-8">
+            <!-- Quick Test Section -->
+            <section class="mb-12">
+                <h2 class="text-2xl font-semibold mb-6 flex items-center gap-3">
+                    <span class="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                    </span>
+                    Instant Test
+                </h2>
+                
+                <div class="gradient-border glow">
+                    <div class="gradient-border-inner p-6">
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-400 mb-2">URL to Test</label>
+                                <input 
+                                    v-model="testUrl" 
+                                    type="url" 
+                                    placeholder="https://your-app.com"
+                                    class="w-full bg-dark-700 border border-dark-500 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition"
+                                >
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-400 mb-2">What to Test</label>
+                                <input 
+                                    v-model="testPrompt" 
+                                    type="text" 
+                                    placeholder="Test the login flow and checkout process"
+                                    class="w-full bg-dark-700 border border-dark-500 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition"
+                                >
+                            </div>
+                        </div>
+                        <div class="mt-6 flex items-center justify-between">
+                            <div class="flex items-center gap-4 text-sm text-gray-400">
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" v-model="takeScreenshots" class="rounded bg-dark-700 border-dark-500 text-blue-500 focus:ring-blue-500">
+                                    Screenshots
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" v-model="generateTestCases" class="rounded bg-dark-700 border-dark-500 text-blue-500 focus:ring-blue-500">
+                                    Generate Test Cases
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" v-model="reportBugs" class="rounded bg-dark-700 border-dark-500 text-blue-500 focus:ring-blue-500">
+                                    Report Bugs
+                                </label>
+                            </div>
+                            <button 
+                                @click="startTest"
+                                :disabled="!testUrl || testing"
+                                class="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg font-medium hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center gap-2"
+                            >
+                                <svg v-if="testing" class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                {{ testing ? 'Testing...' : 'Run Test' }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Stats Grid -->
+            <section class="grid md:grid-cols-4 gap-6 mb-12">
+                <div class="bg-dark-800 rounded-xl p-6 border border-dark-600">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-gray-400 text-sm">Tests Run</span>
+                        <span class="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                            <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <p class="text-3xl font-bold">{{ stats.testsRun }}</p>
+                </div>
+                <div class="bg-dark-800 rounded-xl p-6 border border-dark-600">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-gray-400 text-sm">Bugs Found</span>
+                        <span class="w-8 h-8 bg-red-500/20 rounded-lg flex items-center justify-center">
+                            <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <p class="text-3xl font-bold text-red-400">{{ stats.bugsFound }}</p>
+                </div>
+                <div class="bg-dark-800 rounded-xl p-6 border border-dark-600">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-gray-400 text-sm">Test Cases</span>
+                        <span class="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center">
+                            <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <p class="text-3xl font-bold text-green-400">{{ stats.testCases }}</p>
+                </div>
+                <div class="bg-dark-800 rounded-xl p-6 border border-dark-600">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-gray-400 text-sm">Pass Rate</span>
+                        <span class="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                            <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <p class="text-3xl font-bold text-purple-400">{{ stats.passRate }}%</p>
+                </div>
+            </section>
+
+            <!-- Two Column Layout -->
+            <div class="grid lg:grid-cols-2 gap-8">
+                <!-- Recent Test Results -->
+                <section>
+                    <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                        </svg>
+                        Recent Tests
+                    </h2>
+                    <div class="bg-dark-800 rounded-xl border border-dark-600 overflow-hidden">
+                        <div v-if="recentTests.length === 0" class="p-8 text-center text-gray-500">
+                            <svg class="w-12 h-12 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <p>No tests yet. Run your first test above!</p>
+                        </div>
+                        <div v-else class="divide-y divide-dark-600">
+                            <div v-for="test in recentTests" :key="test.id" class="p-4 hover:bg-dark-700 transition cursor-pointer">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="font-medium truncate flex-1 mr-4">{{ test.url }}</span>
+                                    <span :class="test.passed ? 'text-green-400' : 'text-red-400'" class="text-sm font-medium">
+                                        {{ test.passed ? 'Passed' : 'Failed' }}
+                                    </span>
+                                </div>
+                                <p class="text-sm text-gray-400 truncate">{{ test.description }}</p>
+                                <p class="text-xs text-gray-500 mt-1">{{ test.time }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Bug Reports -->
+                <section>
+                    <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Bug Reports
+                    </h2>
+                    <div class="bg-dark-800 rounded-xl border border-dark-600 overflow-hidden">
+                        <div v-if="bugs.length === 0" class="p-8 text-center text-gray-500">
+                            <svg class="w-12 h-12 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <p>No bugs found yet. That's good news!</p>
+                        </div>
+                        <div v-else class="divide-y divide-dark-600">
+                            <div v-for="bug in bugs" :key="bug.id" class="p-4 hover:bg-dark-700 transition cursor-pointer">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <span :class="{
+                                        'bg-red-500/20 text-red-400': bug.severity === 'critical',
+                                        'bg-orange-500/20 text-orange-400': bug.severity === 'high',
+                                        'bg-yellow-500/20 text-yellow-400': bug.severity === 'medium',
+                                        'bg-blue-500/20 text-blue-400': bug.severity === 'low'
+                                    }" class="px-2 py-0.5 rounded text-xs font-medium uppercase">
+                                        {{ bug.severity }}
+                                    </span>
+                                    <span class="font-medium truncate flex-1">{{ bug.title }}</span>
+                                </div>
+                                <p class="text-sm text-gray-400 truncate">{{ bug.description }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Test Instructions -->
+            <section class="mt-12 bg-dark-800 rounded-xl border border-dark-600 p-8">
+                <h2 class="text-xl font-semibold mb-4">🤖 How This Works</h2>
+                <div class="grid md:grid-cols-3 gap-8 text-gray-400">
+                    <div>
+                        <div class="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center mb-4">
+                            <span class="text-blue-400 font-bold">1</span>
+                        </div>
+                        <h3 class="text-white font-medium mb-2">Enter URL & Instructions</h3>
+                        <p class="text-sm">Paste any URL and describe what you want tested. Be as specific or general as you like.</p>
+                    </div>
+                    <div>
+                        <div class="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center mb-4">
+                            <span class="text-purple-400 font-bold">2</span>
+                        </div>
+                        <h3 class="text-white font-medium mb-2">AI Runs Tests</h3>
+                        <p class="text-sm">Your AI QA Engineer uses Playwright to control a real browser, clicking through flows and looking for issues.</p>
+                    </div>
+                    <div>
+                        <div class="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center mb-4">
+                            <span class="text-green-400 font-bold">3</span>
+                        </div>
+                        <h3 class="text-white font-medium mb-2">Get Results</h3>
+                        <p class="text-sm">Receive detailed bug reports with screenshots, test cases, and recommendations for fixing issues.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="border-t border-dark-600 mt-12 py-6">
+            <div class="max-w-7xl mx-auto px-6 text-center text-gray-500 text-sm">
+                <p>QA Command Center • Powered by your AI QA Engineer</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const { createApp, ref, reactive } = Vue
+
+        createApp({
+            setup() {
+                const testUrl = ref('')
+                const testPrompt = ref('')
+                const testing = ref(false)
+                const takeScreenshots = ref(true)
+                const generateTestCases = ref(true)
+                const reportBugs = ref(true)
+
+                const stats = reactive({
+                    testsRun: 0,
+                    bugsFound: 0,
+                    testCases: 0,
+                    passRate: 100
+                })
+
+                const recentTests = ref([])
+                const bugs = ref([])
+
+                const startTest = async () => {
+                    if (!testUrl.value) return
+                    testing.value = true
+
+                    // Simulate test (in real implementation, this would call your AI backend)
+                    await new Promise(resolve => setTimeout(resolve, 3000))
+
+                    // Add mock result
+                    const passed = Math.random() > 0.3
+                    recentTests.value.unshift({
+                        id: Date.now(),
+                        url: testUrl.value,
+                        description: testPrompt.value || 'General exploration test',
+                        passed,
+                        time: new Date().toLocaleString()
+                    })
+
+                    stats.testsRun++
+                    if (!passed) {
+                        stats.bugsFound++
+                        bugs.value.unshift({
+                            id: Date.now(),
+                            severity: ['critical', 'high', 'medium', 'low'][Math.floor(Math.random() * 4)],
+                            title: 'Sample bug found during test',
+                            description: `Issue discovered while testing ${testUrl.value}`
+                        })
+                    }
+                    stats.testCases += Math.floor(Math.random() * 5) + 1
+                    stats.passRate = Math.round((stats.testsRun - stats.bugsFound) / stats.testsRun * 100)
+
+                    testing.value = false
+                    testUrl.value = ''
+                    testPrompt.value = ''
+                }
+
+                return {
+                    testUrl,
+                    testPrompt,
+                    testing,
+                    takeScreenshots,
+                    generateTestCases,
+                    reportBugs,
+                    stats,
+                    recentTests,
+                    bugs,
+                    startTest
+                }
+            }
+        }).mount('#app')
+    </script>
+</body>
+</html>

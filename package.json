@@ -1,0 +1,11 @@
+{
+  "name": "qa-command-center",
+  "version": "1.0.0",
+  "description": "AI-Powered QA Testing Dashboard",
+  "scripts": {
+    "start": "npx serve -l 3000 -s .",
+    "dev": "npx serve -l 3000 -s ."
+  },
+  "keywords": ["qa", "testing", "ai", "playwright", "automation"],
+  "license": "MIT"
+}
